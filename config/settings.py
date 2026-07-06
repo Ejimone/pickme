@@ -104,6 +104,15 @@ CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_TIMEZONE = "UTC"
+CELERY_BEAT_SCHEDULE = {
+    "expire-stale-swap-requests": {
+        "task": "carpool.tasks.expire_stale_swap_requests",
+        "schedule": 60 * 60,  # hourly, per SYSTEMS-DEEP-DIVE.md
+    },
+}
+
+# Pending swap requests older than this are auto-expired
+SWAP_REQUEST_EXPIRY_HOURS = env.int("SWAP_REQUEST_EXPIRY_HOURS", default=48)
 
 # Clerk auth
 CLERK_ISSUER = env("CLERK_ISSUER", default="")

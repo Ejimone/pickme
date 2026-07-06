@@ -82,3 +82,40 @@ Choices made where the spec docs (`instructions/`) were silent.
 - **Activity permission scoping** reuses `IsFamilyMember` via a
   `family_id` property on `Activity`; flat `/activities/{id}/` routes are
   additionally queryset-scoped to the user's families (others 404).
+
+## Stage 3
+
+- **Group creation payload includes `family`** — API-DESIGN.md doesn't say
+  which of the creator's families joins the new group, and users can belong
+  to several. The named family becomes the group's first `admin` member;
+  the same pattern applies to `POST /carpool-groups/join/`.
+- **Invite codes** are 8 chars from an unambiguous A–Z/2–9 alphabet,
+  generated server-side, unique.
+- **`PUT rotation-rule` replaces rule + order atomically**
+  (`update_or_create` + delete/bulk-create of order entries). The separate
+  `reorder` endpoint suggested in SYSTEMS-DEEP-DIVE.md is covered by this
+  PUT (a reorder is just a PUT with new positions), so it wasn't added as
+  a distinct route.
+- **`round_robin` ignores weights** (everyone gets one slot per cycle);
+  `weighted` expands by repetition exactly per the spec pseudocode;
+  `manual_only` generates nothing.
+- **Slot anchoring**: the engine counts applicable dates from
+  `rule.start_date` up to the window start, so generating week 2 alone
+  yields the same drivers as generating weeks 1–2 together. Holidays
+  (exception with null dismissal) are not applicable dates and consume no
+  slot; existing assignments do consume their slot (per the spec's
+  `slot_number += 1` on skip).
+- **Confirm sets `driver_user` to the confirming user** ("specific person,
+  set once confirmed" per the schema doc) and only works from
+  `suggested`/`confirmed` states.
+- **One pending swap per assignment**; requesting flips the assignment to
+  `swap_pending`. Reject/expiry release it back to `confirmed` when a
+  `driver_user` is set, else `suggested`. Accept reassigns
+  `driver_family`/`driver_user` on that one row only — rotation order is
+  never re-anchored (per SYSTEMS-DEEP-DIVE.md).
+- **`SWAP_REQUEST_EXPIRY_HOURS` (default 48)** drives the hourly
+  `expire_stale_swap_requests` beat task; the schedule is declared in
+  `CELERY_BEAT_SCHEDULE` (django-celery-beat's DatabaseScheduler imports
+  it on startup).
+- **Removing the group's only admin is blocked** — a group must always
+  have at least one admin.

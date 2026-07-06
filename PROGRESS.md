@@ -19,11 +19,11 @@
 - [x] Model + CRUD for `Activity` (`/children/{id}/activities/`, `/activities/{id}/`)
 - [x] "Today" effective-pickup-time resolution in `schools/services.py` (default → early-dismissal weekday → calendar exception → later activity end, tz-aware)
 
-## Stage 3 — Carpool & rotation engine
-- [ ] Models: `CarpoolGroup`, `CarpoolGroupMember`, `CarpoolRotationRule`, `CarpoolRotationOrder`, `CarpoolAssignment`, `CarpoolSwapRequest`
-- [ ] Rotation algorithm (round-robin)
-- [ ] Swap request flow + auto-expiry task
-- [ ] Tests: rotation correctness, swap flow end-to-end
+## Stage 3 — Carpool & rotation engine ✅
+- [x] Models: `CarpoolGroup`, `CarpoolGroupMember`, `CarpoolRotationRule`, `CarpoolRotationOrder`, `CarpoolAssignment`, `CarpoolSwapRequest`
+- [x] Rotation algorithm (round-robin + weighted-by-repetition, never-overwrite, slot-anchored to `start_date`)
+- [x] Swap request flow (request → accept/reject) + hourly `expire_stale_swap_requests` beat task
+- [x] Tests: rotation correctness across multi-week weighted ranges w/ pre-existing manual assignments, swap flow end-to-end, group scoping
 
 ## Stage 4 — Trips & real-time tracking
 - [ ] Models: `Trip`, `TripStop`, `TripStopChild`, `LocationPing`
