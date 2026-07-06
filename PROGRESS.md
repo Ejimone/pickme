@@ -25,13 +25,13 @@
 - [x] Swap request flow (request → accept/reject) + hourly `expire_stale_swap_requests` beat task
 - [x] Tests: rotation correctness across multi-week weighted ranges w/ pre-existing manual assignments, swap flow end-to-end, group scoping
 
-## Stage 4 — Trips & real-time tracking
-- [ ] Models: `Trip`, `TripStop`, `TripStopChild`, `LocationPing`
-- [ ] Channels (Redis layer) + `ws/trips/{trip_id}/` consumer
-- [ ] REST fallback ping endpoint
-- [ ] ETA recalculation task (Distance Matrix, throttled)
-- [ ] Nightly `LocationPing` cleanup
-- [ ] Tests: consumer auth rejection, ETA task, ping cleanup
+## Stage 4 — Trips & real-time tracking ✅
+- [x] Models: `Trip`, `TripStop`, `TripStopChild`, `LocationPing` (BigAutoField pk, `(trip, recorded_at)` index)
+- [x] Channels (Redis layer) + `ws/trips/{trip_id}/` consumer (`JWTAuthMiddleware`, connect-time room authorization, driver-only writes)
+- [x] REST fallback ping endpoint (`POST /trips/{id}/location/`) + `GET /trips/{id}/location/latest/`
+- [x] ETA recalculation task (Distance Matrix behind `MAPS_BACKEND=fake|google`, per-trip Redis lock throttle)
+- [x] Nightly `LocationPing` cleanup (batched deletes, `LOCATION_PING_RETENTION_DAYS`)
+- [x] Tests: consumer auth rejection (4001/4003), ETA task + throttle, ping cleanup, trip scoping/lifecycle/stop transitions
 
 ## Stage 5 — Pickup events
 - [ ] Model + CRUD for `PickupEvent`

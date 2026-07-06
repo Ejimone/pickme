@@ -119,3 +119,38 @@ Choices made where the spec docs (`instructions/`) were silent.
   it on startup).
 - **Removing the group's only admin is blocked** — a group must always
   have at least one admin.
+
+## Stage 4
+
+- **`Trip.driver` is `on_delete=CASCADE`** — the schema doc's cascade section
+  doesn't cover trips; a deleted account's trips (and their pings, per the
+  doc's "no value in orphaned pings") go with it. Users are deactivated, not
+  deleted, in practice (Stage 1 decision), so this path is theoretical.
+- **No cancel endpoint** — the `cancelled` status exists in the schema but
+  API-DESIGN.md defines only `start`/`end`. Cancellation can be added later
+  without schema changes.
+- **Stop `picked_up` accepts an optional `children` subset** in the PATCH
+  body (defaults to all children at the stop) so a driver can record a
+  partial pickup; `TripStopChild.picked_up_at` rows are saved individually
+  so the Stage 5/7 cascade signal fires per child.
+- **Trip creation validates child visibility**: every child on a stop must
+  be in one of the driver's families or in a family sharing a carpool group
+  with the driver — prevents referencing arbitrary child UUIDs.
+- **WS auth token is a query param** (`ws/trips/{id}/?token=...`) — the docs
+  allow query param or first-message payload; query param keeps the
+  consumer's connect-time authorization synchronous and lives in a reusable
+  `accounts.middleware.JWTAuthMiddleware`. Close codes: 4001 unauthenticated,
+  4003 authenticated but not a trip participant.
+- **ETA throttle lock is acquired by the dispatcher** (`record_ping`), not
+  inside the task, exactly per SYSTEMS-DEEP-DIVE.md's write path: `SET NX EX
+  {ETA_THROTTLE_SECONDS}` on `eta_lock:{trip_id}`; a held lock skips dispatch
+  entirely (a fresher ping will trigger the next one).
+- **ETA destination uses stored coordinates** — `School.lat/lng` and
+  `Activity.location_lat/lng` already exist in the schema, so the Distance
+  Matrix call uses coordinates, not address strings; stops without
+  coordinates simply never get an ETA (no geocoding fallback in v1).
+- **`MAPS_BACKEND=fake|google`** selects the Distance Matrix client; the
+  fake is deterministic (60s per 0.01°) so tests/dev never hit the real API.
+  The Google client prefers `duration_in_traffic` when present.
+- **REST fallback ping requires an `in_progress` trip**; the WS path only
+  requires being the driver (the trip room is already scoped on connect).

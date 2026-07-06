@@ -26,3 +26,6 @@ pytest>=8.0
 pytest-django>=4.8
 pytest-asyncio>=0.24
 pytest-mock>=3.14
+
+# Maps (Distance Matrix ETA)
+requests>=2.32

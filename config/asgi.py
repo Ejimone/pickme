@@ -1,6 +1,5 @@
-"""
-ASGI config. WebSocket routing (Channels consumers) is added in Stage 4;
-until then this serves HTTP only, but already runs under an ASGI server.
+"""ASGI config: HTTP via Django, WebSockets via Channels with Clerk-JWT auth
+on connect (token in the query string, verified like the REST auth class).
 """
 
 import os
@@ -11,10 +10,14 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 django_asgi_app = get_asgi_application()
 
-from channels.routing import ProtocolTypeRouter  # noqa: E402
+from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
+
+from accounts.middleware import JWTAuthMiddleware  # noqa: E402
+from trips.routing import websocket_urlpatterns  # noqa: E402
 
 application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
+        "websocket": JWTAuthMiddleware(URLRouter(websocket_urlpatterns)),
     }
 )

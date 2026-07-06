@@ -8,6 +8,7 @@ django-environ. See `.env.example` for the full list.
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -109,10 +110,20 @@ CELERY_BEAT_SCHEDULE = {
         "task": "carpool.tasks.expire_stale_swap_requests",
         "schedule": 60 * 60,  # hourly, per SYSTEMS-DEEP-DIVE.md
     },
+    "cleanup-old-location-pings": {
+        "task": "trips.tasks.cleanup_old_location_pings",
+        "schedule": crontab(hour=3, minute=0),  # nightly, per SYSTEMS-DEEP-DIVE.md
+    },
 }
 
 # Pending swap requests older than this are auto-expired
 SWAP_REQUEST_EXPIRY_HOURS = env.int("SWAP_REQUEST_EXPIRY_HOURS", default=48)
+
+# Maps / trip tracking
+MAPS_BACKEND = env("MAPS_BACKEND", default="fake")  # "fake" | "google"
+GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
+LOCATION_PING_RETENTION_DAYS = env.int("LOCATION_PING_RETENTION_DAYS", default=30)
+ETA_THROTTLE_SECONDS = env.int("ETA_THROTTLE_SECONDS", default=30)
 
 # Clerk auth
 CLERK_ISSUER = env("CLERK_ISSUER", default="")
