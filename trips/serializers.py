@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import serializers
 
 from families.models import Child
-from trips.models import LocationPing, Trip, TripStop, TripStopChild
+from trips.models import LocationPing, PickupEvent, Trip, TripStop, TripStopChild
 
 
 def children_visible_to(user):
@@ -145,3 +145,30 @@ class LocationPingSerializer(serializers.ModelSerializer):
     class Meta:
         model = LocationPing
         fields = ["id", "lat", "lng", "speed", "heading", "recorded_at"]
+
+
+class PickupEventSerializer(serializers.ModelSerializer):
+    child_name = serializers.CharField(source="child.full_name", read_only=True)
+
+    class Meta:
+        model = PickupEvent
+        fields = [
+            "id",
+            "child",
+            "child_name",
+            "date",
+            "pickup_method",
+            "carpool_assignment",
+            "trip_stop_child",
+            "status",
+            "scheduled_time",
+            "created_at",
+        ]
+        read_only_fields = [
+            "child",
+            "date",
+            "carpool_assignment",
+            "trip_stop_child",
+            "scheduled_time",
+            "created_at",
+        ]

@@ -6,10 +6,12 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ValidationErro
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from trips.models import Trip, TripStop
+from core.permissions import IsFamilyMember
+from trips.models import PickupEvent, Trip, TripStop
 from trips.permissions import IsTripDriver, IsTripParticipant, trips_visible_to
 from trips.serializers import (
     LocationPingSerializer,
+    PickupEventSerializer,
     TripCreateSerializer,
     TripSerializer,
     TripStopSerializer,
@@ -172,3 +174,37 @@ class TripViewSet(
         if ping is None:
             raise NotFound("No location recorded for this trip yet.")
         return Response(LocationPingSerializer(ping).data)
+
+
+class PickupEventViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """The "Today" view — one PickupEvent row per child across all of a
+    family's children/schools — plus manual status/method overrides."""
+
+    serializer_class = PickupEventSerializer
+    permission_classes = [IsFamilyMember]
+    http_method_names = ["get", "patch", "head", "options"]
+
+    def get_queryset(self):
+        qs = (
+            PickupEvent.objects.filter(
+                child__family__members__user=self.request.user
+            )
+            .select_related("child")
+            .distinct()
+            .order_by("scheduled_time", "child__full_name")
+        )
+        family = self.request.query_params.get("family")
+        if family:
+            qs = qs.filter(child__family_id=family)
+        date = self.request.query_params.get("date")
+        if self.action == "list":
+            # "Today" semantics: default to today when no date is given.
+            qs = qs.filter(date=date or timezone.localdate())
+        elif date:
+            qs = qs.filter(date=date)
+        return qs

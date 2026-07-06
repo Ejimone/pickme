@@ -107,6 +107,76 @@ class TripStopChild(models.Model):
         return f"{self.child} at {self.trip_stop_id}"
 
 
+class PickupEvent(models.Model):
+    """Daily record of how each child actually gets home — the row the
+    "Today" screen renders per child. One per (child, date)."""
+
+    class Method(models.TextChoices):
+        PARENT = "parent"
+        CARPOOL = "carpool"
+        AFTERCARE = "aftercare"
+        BUS = "bus"
+        WALKER = "walker"
+
+    class Status(models.TextChoices):
+        SCHEDULED = "scheduled"
+        EN_ROUTE = "en_route"
+        ARRIVED = "arrived"
+        PICKED_UP = "picked_up"
+        MISSED = "missed"
+        CANCELLED = "cancelled"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(
+        "families.Child", on_delete=models.CASCADE, related_name="pickup_events"
+    )
+    date = models.DateField()
+    pickup_method = models.CharField(
+        max_length=10, choices=Method.choices, default=Method.PARENT
+    )
+    carpool_assignment = models.ForeignKey(
+        "carpool.CarpoolAssignment",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,  # set when pickup_method='carpool'
+        related_name="pickup_events",
+    )
+    trip_stop_child = models.ForeignKey(
+        TripStopChild,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,  # links to live tracking once a trip starts
+        related_name="pickup_events",
+    )
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.SCHEDULED
+    )
+    scheduled_time = models.DateTimeField(
+        null=True, blank=True  # resolved dismissal/activity end for that day
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "pickup_events"
+        indexes = [
+            models.Index(fields=["date"], name="pickup_date_idx"),
+            models.Index(fields=["child", "date"], name="pickup_child_date_idx"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["child", "date"], name="unique_child_date_pickup"
+            )
+        ]
+
+    @property
+    def family_id(self):
+        # Lets core.permissions.IsFamilyMember scope pickup events.
+        return self.child.family_id
+
+    def __str__(self):
+        return f"{self.child} {self.date} ({self.pickup_method}/{self.status})"
+
+
 class LocationPing(models.Model):
     """High-volume, short-retention (purged nightly beyond ~30 days)."""
 

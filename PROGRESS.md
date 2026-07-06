@@ -33,10 +33,10 @@
 - [x] Nightly `LocationPing` cleanup (batched deletes, `LOCATION_PING_RETENTION_DAYS`)
 - [x] Tests: consumer auth rejection (4001/4003), ETA task + throttle, ping cleanup, trip scoping/lifecycle/stop transitions
 
-## Stage 5 — Pickup events
-- [ ] Model + CRUD for `PickupEvent`
-- [ ] Daily generation task/signal
-- [ ] "Today" aggregation endpoint
+## Stage 5 — Pickup events ✅
+- [x] `PickupEvent` model (in the `trips` app; unique `(child, date)`, `date`/`(child,date)` indexes) + `PATCH /pickup-events/{id}/` override
+- [x] Daily generation task (`generate_daily_pickup_events` beat) + signal cascade: trip→in_progress ensures a row per child (en_route), stop arrived → arrived, `TripStopChild.picked_up_at` → picked_up
+- [x] "Today" aggregation endpoint (`GET /pickup-events/?date=&family=`, one row per child across a family's schools, defaults to today)
 
 ## Stage 6 — Chat
 - [ ] Models: `ChatThread`, `ChatMessage`, `ChatReadReceipt`

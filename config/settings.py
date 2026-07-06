@@ -114,6 +114,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "trips.tasks.cleanup_old_location_pings",
         "schedule": crontab(hour=3, minute=0),  # nightly, per SYSTEMS-DEEP-DIVE.md
     },
+    "generate-daily-pickup-events": {
+        "task": "trips.tasks.generate_daily_pickup_events",
+        "schedule": crontab(hour=5, minute=0),  # early each day, before dismissals
+    },
 }
 
 # Pending swap requests older than this are auto-expired

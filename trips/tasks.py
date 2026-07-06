@@ -64,6 +64,17 @@ def recalculate_trip_eta(trip_id):
 
 
 @shared_task
+def generate_daily_pickup_events(date=None):
+    """Nightly/early beat task: ensure a PickupEvent exists per child with a
+    resolvable pickup today (covers plain, non-carpool days where no trip is
+    ever started). Idempotent via the (child, date) constraint."""
+    from trips.pickups import generate_daily_pickup_events as _generate
+
+    target = date or timezone.localdate()
+    return _generate(target)
+
+
+@shared_task
 def cleanup_old_location_pings():
     """Nightly beat task. Batched deletes (5k rows) to avoid long locks on a
     high-volume table; naturally idempotent."""

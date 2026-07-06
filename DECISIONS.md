@@ -154,3 +154,36 @@ Choices made where the spec docs (`instructions/`) were silent.
   The Google client prefers `duration_in_traffic` when present.
 - **REST fallback ping requires an `in_progress` trip**; the WS path only
   requires being the driver (the trip room is already scoped on connect).
+
+## Stage 5
+
+- **`PickupEvent` lives in the `trips` app**, not a new `pickups` app — the
+  working-rule app list is fixed (8 apps, no `pickups`), and `PickupEvent`
+  FKs `TripStopChild` (trips) and `CarpoolAssignment` (carpool), both of
+  which `trips` already depends on. Routes stay at `/api/v1/pickup-events/`.
+- **`scheduled_time` is nullable** (schema implies non-null). A trip can run
+  on a day `resolve_effective_pickup_time` returns `None` for (e.g. an
+  ad-hoc pickup); rather than fabricate a time, the row is created with a
+  null `scheduled_time` and backfilled if a real time later resolves.
+- **Cascade is a signal chain in `trips/signals.py` delegating to
+  `trips/pickups.py`** (thin signals rule): `Trip` post_save at
+  `in_progress` → `ensure_pickup_events_for_trip` (one row per child, method
+  `carpool` when the trip has a group, status `en_route`); `TripStop`
+  post_save → `sync_stop_status` (en_route/arrived propagate, never
+  downgrading a picked_up row); `TripStopChild.picked_up_at` set →
+  `mark_child_picked_up`. The Notification fan-out on picked_up is deferred
+  to Stage 7. Trip-start marks stops en_route via a bulk `.update()` (no
+  per-row signal), so the en_route status is set directly on the events.
+- **Auto-derived `pickup_method` is `parent` or `carpool` only** — the other
+  choices (`aftercare`/`bus`/`walker`) are manual overrides via PATCH.
+  `carpool` is chosen when a non-cancelled `CarpoolAssignment` covers the
+  child's group+school+date, or (for trip-generated rows) when the trip
+  carries a carpool group.
+- **Daily generation is a single global beat task** iterating active
+  children with a school and a resolvable pickup that day — fine at this
+  scale; idempotent via `get_or_create` on `(child, date)`.
+- **"Today" list defaults `date` to `timezone.localdate()`** when the query
+  param is absent; detail/PATCH are not date-filtered.
+- **Generation never downgrades an existing row** — `ensure_pickup_event`
+  only backfills an empty `trip_stop_child`/`scheduled_time`; status and a
+  manual method override set by a user are preserved on re-runs.
