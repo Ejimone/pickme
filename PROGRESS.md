@@ -44,11 +44,14 @@
 - [x] REST: `/chat-threads/` list (scoped), `/chat-threads/{id}/messages/` cursor-paginated history + POST send, `/chat-threads/{id}/read/` mark-read-up-to
 - [x] Tests: consumer auth rejection (4001/4003) + fan-out, thread scoping, send/history, read-receipt idempotency (20 tests)
 
-## Stage 7 — Notifications
-- [ ] Models: `Notification`, `NotificationPreference`, `DeviceToken`
-- [ ] Dismissal reminder beat task
-- [ ] Expo push fan-out task
-- [ ] Notification triggers wired
+## Stage 7 — Notifications ✅
+- [x] Models: `Notification` (+ `delivered_at`/`dedupe_key`, see DECISIONS), `NotificationPreference`, `DeviceToken`
+- [x] Poller beat (`poll_upcoming_dismissals`, every 5 min) → per-child `send_dismissal_reminder` (dedupe-keyed, idempotent)
+- [x] Expo push fan-out task (`send_push_notification`, `delivered_at` guard, `PUSH_BACKEND=fake|expo`, per-type push preference)
+- [x] `ws/notifications/{user_id}/` consumer (own-stream-only auth, read-only, `notification.new`) + post_save fan-out signal
+- [x] REST: `/notifications/` (`?is_read=`) + `/{id}/read/`, `/notification-preferences/` list + PATCH by type, `/device-tokens/` register/delete
+- [x] Triggers wired: swap request, chat message, schedule change, driver arrived (stop → arrived), pickup cascade (PickupEvent → picked_up)
+- [x] Tests: API scoping, consumer auth rejection (4001/4003) + fan-out, push idempotency/preference gating, dismissal dedupe, poller window, all four triggers (26 tests)
 
 ## Stage 8 — Safety
 - [ ] `SOSAlert` model + immediate fan-out (WebSocket + push)

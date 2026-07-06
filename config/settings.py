@@ -118,6 +118,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "trips.tasks.generate_daily_pickup_events",
         "schedule": crontab(hour=5, minute=0),  # early each day, before dismissals
     },
+    "poll-upcoming-dismissals": {
+        "task": "notifications.tasks.poll_upcoming_dismissals",
+        "schedule": 5 * 60,  # every 5 min, per SYSTEMS-DEEP-DIVE.md poller pattern
+    },
 }
 
 # Pending swap requests older than this are auto-expired
@@ -128,6 +132,14 @@ MAPS_BACKEND = env("MAPS_BACKEND", default="fake")  # "fake" | "google"
 GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default="")
 LOCATION_PING_RETENTION_DAYS = env.int("LOCATION_PING_RETENTION_DAYS", default=30)
 ETA_THROTTLE_SECONDS = env.int("ETA_THROTTLE_SECONDS", default=30)
+
+# Notifications / push
+PUSH_BACKEND = env("PUSH_BACKEND", default="fake")  # "fake" | "expo"
+EXPO_PUSH_URL = env("EXPO_PUSH_URL", default="https://exp.host/--/api/v2/push/send")
+# Minutes before dismissal to fire the pickup reminder (poller window width).
+DISMISSAL_REMINDER_OFFSET_MINUTES = env.int(
+    "DISMISSAL_REMINDER_OFFSET_MINUTES", default=30
+)
 
 # Clerk auth
 CLERK_ISSUER = env("CLERK_ISSUER", default="")

@@ -215,3 +215,42 @@ Choices made where the spec docs (`instructions/`) were silent.
 - **Thread access = carpool-group membership or trip participation**
   (`threads_visible_to`), reused by the list queryset, `IsThreadParticipant`,
   and the consumer's connect check — mirrors the trips visibility helper.
+
+## Stage 7
+
+- **Two fields beyond DATABASE-SCHEMA.md §22 on `Notification`**, both driven
+  by SYSTEMS-DEEP-DIVE.md §1: `delivered_at` (set before the Expo call so
+  `send_push_notification` retries never double-send) and `dedupe_key`
+  (nullable, unique-when-set). The deep-dive's example marker was a unique
+  `(type, child, date)`; we generalized it to one opaque per-recipient key so
+  the same mechanism dedupes dismissal reminders (`pickup_reminder:{user}:
+  {child}:{date}`), stop arrivals (`driver_arrived:{user}:{stop}`), and pickup
+  cascades (`picked_up:{user}:{child}:{date}`). Keys embed `user.id` so one
+  recipient's marker never suppresses another's.
+- **`create_notification` is the single write path.** REST, tasks, and trigger
+  signals all call it; a `post_save` signal on `Notification` does the
+  `notification.new` WebSocket broadcast (instant) and dispatches
+  `send_push_notification` on commit (`transaction.on_commit`) so the worker
+  reads a committed row — same split as the trips ping path.
+- **Preferences gate push only, not the in-app feed.** A `Notification` row
+  (and its WS broadcast) is always created; `push_enabled` (default on when no
+  row exists) only decides whether Expo is called. SMS/email channels are
+  modeled but not yet wired to providers.
+- **The pickup cascade reuses the `driver_arrived` type.** The schema enum has
+  no `picked_up` value, so `PickupEvent → picked_up` notifications are typed
+  `driver_arrived` with a distinct body ("… has been picked up") and a
+  `picked_up:*` dedupe key, keeping them separate from the stop-arrival
+  `driver_arrived` notifications.
+- **Dismissals use the poller pattern** (SYSTEMS-DEEP-DIVE.md §1): a single
+  `poll_upcoming_dismissals` beat (every 5 min) resolves each active child's
+  effective pickup in the school's tz and dispatches `send_dismissal_reminder`
+  when it lands in the `[now, now + DISMISSAL_REMINDER_OFFSET_MINUTES)` window
+  — no per-school beat schedule needed.
+- **Expo client is backend-selectable** (`PUSH_BACKEND=fake|expo`), mirroring
+  the Maps client, so tests/local dev never hit exp.host.
+- **`NotificationConsumer` is own-stream-only**: connect authorization requires
+  `scope["user"].id == {user_id}`; the stream is read-only (any client-sent
+  frame gets an error), matching SYSTEMS-DEEP-DIVE.md §2.
+- **Device-token registration is idempotent** via `update_or_create` on the
+  unique `token` (the serializer's `UniqueValidator` is dropped) so a reinstall
+  rebinds the token to the current user instead of 409-ing.
