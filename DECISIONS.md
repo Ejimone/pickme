@@ -63,3 +63,22 @@ Choices made where the spec docs (`instructions/`) were silent.
   serializer.
 - **School PATCH is open to any authenticated user** per API-DESIGN.md
   (shared reference data; no ownership concept on schools in v1).
+
+## Stage 2
+
+- **`Activity` lives in the `families` app** (it's child-scoped data, like
+  `Child`); the resolution logic lives in `schools/services.py` per the
+  build prompt and imports nothing at module scope that would couple the
+  apps.
+- **`Activity.day_of_week` uses Python's weekday convention** (0=Monday …
+  6=Sunday), matching `date.weekday()` and the
+  `School.early_dismissal_days` keys. The schema doc says only "0–6".
+- **Resolution semantics** (`resolve_effective_pickup_time(child, date)`):
+  weekends and holiday exceptions (`dismissal_time=None`) yield no base
+  dismissal; an activity that day still produces a pickup time on its own
+  (kids get dropped off at practice on days off). No school assigned, or
+  no school day + no activity → `None`. Comparisons happen in the school's
+  IANA timezone; the return value is a UTC-aware datetime.
+- **Activity permission scoping** reuses `IsFamilyMember` via a
+  `family_id` property on `Activity`; flat `/activities/{id}/` routes are
+  additionally queryset-scoped to the user's families (others 404).

@@ -7,8 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.permissions import IsFamilyMember
-from families.models import Child, Family, FamilyInvite, FamilyMember
+from families.models import Activity, Child, Family, FamilyInvite, FamilyMember
 from families.serializers import (
+    ActivitySerializer,
     ChildSerializer,
     FamilyInviteSerializer,
     FamilyMemberSerializer,
@@ -173,3 +174,36 @@ class ChildViewSet(viewsets.ModelViewSet):
         # Soft-delete: pickup history keeps referencing the row.
         instance.is_active = False
         instance.save(update_fields=["is_active"])
+
+    @action(detail=True, methods=["get", "post"], url_path="activities")
+    def activities(self, request, pk=None):
+        """GET/POST /children/{child_id}/activities/"""
+        child = self.get_object()
+        if request.method == "POST":
+            serializer = ActivitySerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(child=child)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        page = self.paginate_queryset(
+            child.activities.order_by("day_of_week", "start_time")
+        )
+        serializer = ActivitySerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+
+class ActivityViewSet(
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Flat routes per API-DESIGN.md: PATCH/DELETE /activities/{id}/."""
+
+    serializer_class = ActivitySerializer
+
+    def get_queryset(self):
+        return Activity.objects.filter(
+            child__family__members__user=self.request.user,
+            child__is_active=True,
+        ).select_related("child")

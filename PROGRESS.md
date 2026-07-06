@@ -15,9 +15,9 @@
 - [x] Family invite flow (email invite → accept by token)
 - [x] Tests: family-scoped access control (user A can't see family B's children), invite flow end-to-end, owner-only actions
 
-## Stage 2 — Activities
-- [ ] Model + CRUD for `Activity`
-- [ ] "Today" effective-pickup-time resolution in `schools/services.py`
+## Stage 2 — Activities ✅
+- [x] Model + CRUD for `Activity` (`/children/{id}/activities/`, `/activities/{id}/`)
+- [x] "Today" effective-pickup-time resolution in `schools/services.py` (default → early-dismissal weekday → calendar exception → later activity end, tz-aware)
 
 ## Stage 3 — Carpool & rotation engine
 - [ ] Models: `CarpoolGroup`, `CarpoolGroupMember`, `CarpoolRotationRule`, `CarpoolRotationOrder`, `CarpoolAssignment`, `CarpoolSwapRequest`

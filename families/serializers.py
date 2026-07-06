@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from accounts.serializers import UserSummarySerializer
-from families.models import Child, Family, FamilyInvite, FamilyMember
+from families.models import Activity, Child, Family, FamilyInvite, FamilyMember
 
 
 class FamilySerializer(serializers.ModelSerializer):
@@ -57,3 +57,30 @@ class ChildSerializer(serializers.ModelSerializer):
                 "You are not a member of this family."
             )
         return family
+
+
+class ActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activity
+        fields = [
+            "id",
+            "child",
+            "name",
+            "day_of_week",
+            "start_time",
+            "end_time",
+            "location_name",
+            "location_lat",
+            "location_lng",
+            "created_at",
+        ]
+        read_only_fields = ["id", "child", "created_at"]
+
+    def validate(self, attrs):
+        start = attrs.get("start_time", getattr(self.instance, "start_time", None))
+        end = attrs.get("end_time", getattr(self.instance, "end_time", None))
+        if start and end and end <= start:
+            raise serializers.ValidationError(
+                {"end_time": ["end_time must be after start_time."]}
+            )
+        return attrs
