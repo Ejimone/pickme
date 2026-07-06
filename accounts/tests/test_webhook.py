@@ -90,7 +90,7 @@ class TestClerkWebhook:
         assert user.email == "real@example.com"
         assert User.objects.count() == 1
 
-    def test_user_deleted(self, client, clerk_settings):
+    def test_user_deleted_deactivates(self, client, clerk_settings):
         User.objects.create_user(email="x@example.com", clerk_user_id="user_wh1")
         resp = post_event(
             client,
@@ -98,7 +98,8 @@ class TestClerkWebhook:
             {"type": "user.deleted", "data": {"id": "user_wh1", "deleted": True}},
         )
         assert resp.status_code == 204
-        assert not User.objects.filter(clerk_user_id="user_wh1").exists()
+        user = User.objects.get(clerk_user_id="user_wh1")
+        assert user.is_active is False
 
     def test_invalid_signature_rejected(self, client, clerk_settings):
         resp = post_event(

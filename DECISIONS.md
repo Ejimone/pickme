@@ -32,3 +32,34 @@ Choices made where the spec docs (`instructions/`) were silent.
   Docker — both hit the same `config.asgi:application`.
 - **`.env.docker` is committed** (compose needs it; contains only dev-local
   values, no secrets). `.env` stays gitignored.
+
+## Stage 1
+
+- **`FamilyInvite` model added** — DATABASE-SCHEMA.md's 25 tables don't
+  include an invite table, but Stage 1/API-DESIGN require an email-invite →
+  accept flow. Fields: family, email, invited_by, unique `token` (UUID),
+  status (`pending`/`accepted`/`revoked`), timestamps.
+- **Invite acceptance is by token possession** (`POST
+  /api/v1/family-invites/accept/ {"token"}`), no email match required —
+  JIT-provisioned users may still carry a placeholder email when they
+  accept. API-DESIGN.md doesn't define the accept endpoint; this one was
+  chosen.
+- **Invite email** goes through Django's email framework with the console
+  backend by default (`EMAIL_BACKEND` env var swaps in a real provider
+  later).
+- **`user.deleted` now deactivates** (`is_active=False`) instead of
+  hard-deleting — `families.created_by` is `on_delete=PROTECT` and pickup
+  history must survive account deletion. Supersedes the Stage 0 decision.
+- **`Child.is_active` soft-delete flag added** per the schema doc's cascade
+  notes; `DELETE /children/{id}/` flips it and the API filters it out.
+- **`Child.school` is `on_delete=SET_NULL`** — schema says schools should
+  never really be deleted; if one is removed, children shouldn't vanish.
+- **Family renames and member removal are owner-only** (PLAN.md treats
+  members as equal for children/schedules; ownership actions stay with the
+  owner per API-DESIGN.md). The owner's own membership row can't be removed.
+- **`School.early_dismissal_days` format defined** as a JSON object mapping
+  Python weekday ints (as strings, 0=Monday) to `"HH:MM"`, e.g.
+  `{"2": "13:30"}` = Wednesdays dismiss at 1:30pm. Validated in the
+  serializer.
+- **School PATCH is open to any authenticated user** per API-DESIGN.md
+  (shared reference data; no ownership concept on schools in v1).

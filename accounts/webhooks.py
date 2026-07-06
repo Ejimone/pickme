@@ -63,7 +63,11 @@ class ClerkWebhookView(View):
         if event_type in ("user.created", "user.updated"):
             self.upsert_user(clerk_user_id, data)
         elif event_type == "user.deleted":
-            User.objects.filter(clerk_user_id=clerk_user_id).delete()
+            # Deactivate rather than delete: families/children FK users
+            # and pickup history must survive an account deletion.
+            User.objects.filter(clerk_user_id=clerk_user_id).update(
+                is_active=False
+            )
         # Unknown event types are acknowledged so Clerk stops retrying.
         return HttpResponse(status=204)
 

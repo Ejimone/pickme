@@ -34,6 +34,8 @@ class IsFamilyMember(BasePermission):
     message = "You are not a member of this family."
 
     def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated):
+            return False
         family_id = view.kwargs.get("family_id") or view.kwargs.get("family_pk")
         if family_id is None:
             return True  # defer to object-level check
@@ -56,6 +58,8 @@ class IsCarpoolGroupMember(BasePermission):
     required_roles = None  # None = any role
 
     def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated):
+            return False
         group_id = view.kwargs.get("carpool_group_id") or view.kwargs.get(
             "carpool_group_pk"
         )

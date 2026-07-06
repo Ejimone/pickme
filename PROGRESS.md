@@ -9,11 +9,11 @@
 - [x] Health check endpoint (`/api/v1/health/`), pytest config, 16 tests passing
 - [x] `docker-compose.yml` (db, redis, web, worker, beat) + `Dockerfile`
 
-## Stage 1 — Core domain
-- [ ] Models: `User` (done in Stage 0), `Family`, `FamilyMember`, `School`, `SchoolCalendarException`, `Child`
-- [ ] Serializers + viewsets + routing
-- [ ] Family invite flow (email invite → accept)
-- [ ] Tests: family-scoped access control
+## Stage 1 — Core domain ✅
+- [x] Models: `User` (Stage 0), `Family`, `FamilyMember`, `FamilyInvite`, `School`, `SchoolCalendarException`, `Child`
+- [x] Serializers + viewsets + routing (`/families/`, `/children/`, `/schools/`, calendar exceptions)
+- [x] Family invite flow (email invite → accept by token)
+- [x] Tests: family-scoped access control (user A can't see family B's children), invite flow end-to-end, owner-only actions
 
 ## Stage 2 — Activities
 - [ ] Model + CRUD for `Activity`

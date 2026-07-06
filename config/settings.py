@@ -134,6 +134,12 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
+# Family invites etc.; console backend until a real provider is wired up
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@pickme.local")
+
 AUTH_PASSWORD_VALIDATORS = []  # Clerk owns credentials; Django never sees passwords
 
 LANGUAGE_CODE = "en-us"
