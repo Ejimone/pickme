@@ -38,10 +38,11 @@
 - [x] Daily generation task (`generate_daily_pickup_events` beat) + signal cascade: trip→in_progress ensures a row per child (en_route), stop arrived → arrived, `TripStopChild.picked_up_at` → picked_up
 - [x] "Today" aggregation endpoint (`GET /pickup-events/?date=&family=`, one row per child across a family's schools, defaults to today)
 
-## Stage 6 — Chat
-- [ ] Models: `ChatThread`, `ChatMessage`, `ChatReadReceipt`
-- [ ] `ws/chat/{thread_id}/` consumer
-- [ ] REST history endpoint (cursor pagination)
+## Stage 6 — Chat ✅
+- [x] Models: `ChatThread`, `ChatMessage`, `ChatReadReceipt` (partial-unique thread per group/trip, `(thread, created_at)` index); threads auto-created by signal on group/trip creation
+- [x] `ws/chat/{thread_id}/` consumer (reuses `JWTAuthMiddleware`, connect-time participant check, `message.send`/`message.read` → `message.new`/`message.read`)
+- [x] REST: `/chat-threads/` list (scoped), `/chat-threads/{id}/messages/` cursor-paginated history + POST send, `/chat-threads/{id}/read/` mark-read-up-to
+- [x] Tests: consumer auth rejection (4001/4003) + fan-out, thread scoping, send/history, read-receipt idempotency (20 tests)
 
 ## Stage 7 — Notifications
 - [ ] Models: `Notification`, `NotificationPreference`, `DeviceToken`

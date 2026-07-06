@@ -187,3 +187,31 @@ Choices made where the spec docs (`instructions/`) were silent.
 - **Generation never downgrades an existing row** — `ensure_pickup_event`
   only backfills an empty `trip_stop_child`/`scheduled_time`; status and a
   manual method override set by a user are preserved on re-runs.
+
+## Stage 6
+
+- **Threads are auto-created by signal**, not via a POST endpoint
+  (API-DESIGN.md lists no thread-create route): `chat/signals.py` fires
+  `get_or_create` on `CarpoolGroup` creation (a `carpool_group` thread) and
+  `Trip` creation (a `trip` "today's run" thread, carrying the trip's
+  carpool group). Partial unique constraints (`context_type`-conditioned)
+  keep it to one thread per group and one per trip.
+- **`ChatConsumer` broadcast types use dots** (`message.new`/`message.read`)
+  to match API-DESIGN.md; Channels maps the dotted `type` to the
+  `message_new`/`message_read` handler methods (it replaces `.` with `_`).
+  Client→server events are `message.send`/`message.read`.
+- **`post_message` / `mark_read` live in `chat/services.py`** and are shared
+  by the consumer and the REST fallback so both persist and broadcast
+  identically (same pattern as `trips.services.record_ping`).
+- **"Mark read up to a message"** bulk-creates `ChatReadReceipt` rows for
+  every message in the thread at or before the target's `created_at` that the
+  user hasn't already receipted (`bulk_create(ignore_conflicts=True)`) —
+  idempotent, and honors the per-message `(message, user)` unique constraint
+  in the schema rather than storing only a high-water mark.
+- **History uses the shared `TimeOrderedCursorPagination`** (`-created_at`),
+  to which a `page_size` query param + `max_page_size=100` were added (it
+  previously had a fixed page size); this also benefits location-ping
+  history.
+- **Thread access = carpool-group membership or trip participation**
+  (`threads_visible_to`), reused by the list queryset, `IsThreadParticipant`,
+  and the consumer's connect check — mirrors the trips visibility helper.
