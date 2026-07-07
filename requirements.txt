@@ -16,6 +16,7 @@ redis>=5.0
 
 # Auth
 PyJWT[crypto]>=2.9
+certifi>=2024.0
 svix>=1.30
 
 # API schema

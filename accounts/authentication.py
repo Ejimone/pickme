@@ -6,8 +6,10 @@ the token's `sub` claim. Webhooks are the primary profile sync path; JIT
 creation only covers the gap before the first webhook fires.
 """
 
+import ssl
 import threading
 
+import certifi
 import jwt
 from django.conf import settings
 from rest_framework import authentication, exceptions
@@ -25,7 +27,12 @@ def get_jwks_client():
                     "Clerk is not configured (CLERK_JWKS_URL missing)."
                 )
             _jwks_client = jwt.PyJWKClient(
-                settings.CLERK_JWKS_URL, cache_keys=True, lifespan=3600
+                settings.CLERK_JWKS_URL,
+                cache_keys=True,
+                lifespan=3600,
+                # urllib defaults to the OS trust store, which macOS Pythons
+                # often ship without — use certifi's CA bundle instead.
+                ssl_context=ssl.create_default_context(cafile=certifi.where()),
             )
         return _jwks_client
 
