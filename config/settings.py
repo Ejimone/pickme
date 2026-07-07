@@ -15,8 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env(
     DEBUG=(bool, False),
+    # Local-dev defaults only; every deployment sets these via env vars.
     ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
-    CSRF_TRUSTED_ORIGINS=(list, ["http://localhost:8000", "http://127.0.0.1:8000", "https://*.ngrok-free.dev"]),
+    CSRF_TRUSTED_ORIGINS=(
+        list,
+        ["http://localhost:8000", "http://127.0.0.1:8000"],
+    ),
     CLERK_AUTHORIZED_PARTIES=(list, []),
 )
 
