@@ -30,6 +30,7 @@ These docs are the spec. Where the docs are silent, use standard Django/DRF conv
 
 ## Working rules
 
+0. **Do not push code to GitHub.** Never run `git push`, `git push --force`, `git push --force-with-lease`, or any other command that publishes commits to a remote repository unless I explicitly ask for it in this conversation.
 1. **Work stage by stage per `BUILD-STAGES.md`.** Complete a stage — models, migrations, serializers, views, URLs, permissions, tests all passing — before starting the next. Commit at each stage boundary with a message like `stage-3: carpool + rotation engine`.
 2. **Tests are not optional.** Each stage's spec lists required tests; write them. Minimum bar overall: permission/scoping tests for every resource (user A must never see family B's data), rotation engine correctness across a multi-week weighted range with pre-existing manual assignments, Channels consumer connect-authorization rejection, swap request flow end to end, and the pickup cascade (TripStopChild.picked_up_at → PickupEvent → Notification).
 3. **Project layout**: `config/` for settings/asgi/celery, apps: `accounts`, `families`, `schools`, `carpool`, `trips`, `chat`, `notifications`, `core` (shared permissions, pagination, error envelope handler).
