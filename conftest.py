@@ -16,10 +16,10 @@ def rsa_keypair():
 
 @pytest.fixture
 def clerk_settings(settings):
-    settings.CLERK_ISSUER = "https://test.clerk.accounts.dev"
-    settings.CLERK_JWKS_URL = "https://test.clerk.accounts.dev/.well-known/jwks.json"
+    settings.CLERK_ISSUER = ""
+    settings.CLERK_JWKS_URL = ""
     settings.CLERK_AUTHORIZED_PARTIES = []
-    settings.CLERK_WEBHOOK_SIGNING_SECRET = "whsec_dGVzdHNlY3JldHRlc3RzZWNyZXQ="
+    settings.CLERK_WEBHOOK_SIGNING_SECRET = ""
     return settings
 
 
