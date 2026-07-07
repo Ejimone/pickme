@@ -281,3 +281,30 @@ Choices made where the spec docs (`instructions/`) were silent.
   future change, noted here rather than silently assumed.
 - **Any guardian can resolve**; the list defaults to `status=active` and is
   scoped to alerts on trips the user can see (or ones they raised).
+
+## Stage 9
+
+- **Cloudinary via a backend-selectable client** (`core/cloudinary.py`,
+  `CLOUDINARY_BACKEND=fake|cloudinary`) mirroring the Maps/Expo pattern, so
+  tests and local dev never hit the network. Implemented with `requests` +
+  `hashlib` against Cloudinary's documented signed-upload REST contract — **no
+  extra Python dependency** (no `cloudinary` SDK).
+- **Two upload paths.** `POST /children/{id}/photo/` proxies a multipart file
+  server-side and stores the returned secure URL (matches API-DESIGN.md's
+  binding route; it also accepts an already-hosted `photo_url`).
+  `POST /media/signature/` hands the client short-lived signed params so it can
+  upload directly to Cloudinary (used for chat attachments, per
+  FRONTEND-ARCHITECTURE.md) — the API secret never leaves the server.
+- **OpenAPI**: schema served at `/api/v1/schema/` (+ `swagger-ui/`, `redoc/`)
+  and exported to `schema/openapi.yaml` — this is the frontend's typed contract
+  (`openapi-fetch`/`orval`). A `drf-spectacular` `OpenApiAuthenticationExtension`
+  (`accounts/schema.py`, loaded in `AccountsConfig.ready`) documents the Clerk
+  Bearer scheme so the schema and Swagger "Authorize" work. The three plain
+  `APIView`s (health, media-signature, invite-accept) carry `@extend_schema`
+  annotations so generation is error-free. Remaining warnings are cosmetic
+  (untyped UUID path params default to `string`, which is correct).
+- **Deploy is spec-only** (`.do/app.yaml`): one Docker image run four ways —
+  `web` (uvicorn ASGI, so HTTP + WebSockets share a port), `worker`, `beat`, and
+  a `PRE_DEPLOY` `migrate` job — plus managed Postgres + Redis (Redis backs the
+  Celery broker, the Channels layer, and the ETA throttle). Secrets are set in
+  the DO dashboard/`doctl`, never committed.

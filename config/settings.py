@@ -143,6 +143,13 @@ DISMISSAL_REMINDER_OFFSET_MINUTES = env.int(
     "DISMISSAL_REMINDER_OFFSET_MINUTES", default=30
 )
 
+# Media / Cloudinary
+CLOUDINARY_BACKEND = env("CLOUDINARY_BACKEND", default="fake")  # "fake" | "cloudinary"
+CLOUDINARY_CLOUD_NAME = env("CLOUDINARY_CLOUD_NAME", default="")
+CLOUDINARY_API_KEY = env("CLOUDINARY_API_KEY", default="")
+CLOUDINARY_API_SECRET = env("CLOUDINARY_API_SECRET", default="")
+CLOUDINARY_UPLOAD_FOLDER = env("CLOUDINARY_UPLOAD_FOLDER", default="pickme")
+
 # Clerk auth
 CLERK_ISSUER = env("CLERK_ISSUER", default="")
 CLERK_JWKS_URL = env(

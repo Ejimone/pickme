@@ -1,6 +1,7 @@
 from django.core.mail import send_mail
 from django.db.models import Count
 from django.utils import timezone
+from drf_spectacular.utils import OpenApiTypes, extend_schema
 from rest_framework import exceptions, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -122,6 +123,7 @@ class FamilyViewSet(
 class InviteAcceptView(APIView):
     """POST /family-invites/accept/ {"token": "..."} — joins the family."""
 
+    @extend_schema(request=InviteAcceptSerializer, responses=OpenApiTypes.OBJECT)
     def post(self, request):
         serializer = InviteAcceptSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -174,6 +176,31 @@ class ChildViewSet(viewsets.ModelViewSet):
         # Soft-delete: pickup history keeps referencing the row.
         instance.is_active = False
         instance.save(update_fields=["is_active"])
+
+    @action(detail=True, methods=["post"], url_path="photo")
+    def photo(self, request, pk=None):
+        """POST /children/{id}/photo/ — set the child's avatar.
+
+        Accepts a multipart `file` (proxied to Cloudinary, per API-DESIGN.md) or
+        an already-hosted `photo_url` (e.g. after a client-side signed upload via
+        /media/signature/). Stores the resulting URL and returns the child.
+        """
+        from core.cloudinary import get_media_client
+
+        child = self.get_object()
+        upload = request.FILES.get("file")
+        if upload is not None:
+            child.photo_url = get_media_client().upload(
+                upload, folder="children"
+            )
+        elif request.data.get("photo_url"):
+            child.photo_url = request.data["photo_url"]
+        else:
+            raise exceptions.ValidationError(
+                {"file": ["Provide a file upload or a photo_url."]}
+            )
+        child.save(update_fields=["photo_url"])
+        return Response(ChildSerializer(child).data)
 
     @action(detail=True, methods=["get", "post"], url_path="activities")
     def activities(self, request, pk=None):

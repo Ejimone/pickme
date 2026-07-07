@@ -1,0 +1,140 @@
+# DigitalOcean App Platform spec for PickMe.
+#
+# Four run targets off one Docker image (Dockerfile):
+#   - web    : ASGI (uvicorn) — HTTP + WebSockets on one port
+#   - worker : Celery worker
+#   - beat   : Celery beat (django-celery-beat DB scheduler)
+#   - migrate: PRE_DEPLOY job that runs migrations before each release
+# Managed add-ons: PostgreSQL + Redis (broker + Channels layer + cache).
+#
+# Deploy:  doctl apps create --spec .do/app.yaml   (then set the SECRET envs
+# in the dashboard, or with `doctl apps update`). Fill in <your-org>/<repo>.
+
+name: pickme
+region: nyc
+
+databases:
+  - name: pickme-db
+    engine: PG
+    version: "16"
+    production: false        # bump to a real plan for prod
+  - name: pickme-redis
+    engine: REDIS
+    version: "7"
+    production: false
+
+services:
+  - name: web
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      repo: <your-org>/<repo>
+      branch: main
+      deploy_on_push: true
+    http_port: 8000
+    run_command: uvicorn config.asgi:application --host 0.0.0.0 --port 8000
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    health_check:
+      http_path: /api/v1/health/
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${pickme-db.DATABASE_URL}
+      - key: REDIS_URL
+        scope: RUN_TIME
+        value: ${pickme-redis.DATABASE_URL}
+      - key: ALLOWED_HOSTS
+        scope: RUN_TIME
+        value: ${APP_DOMAIN}
+      - key: CSRF_TRUSTED_ORIGINS
+        scope: RUN_TIME
+        value: https://${APP_DOMAIN}
+
+workers:
+  - name: worker
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      repo: <your-org>/<repo>
+      branch: main
+      deploy_on_push: true
+    run_command: celery -A config worker -l info
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${pickme-db.DATABASE_URL}
+      - key: REDIS_URL
+        scope: RUN_TIME
+        value: ${pickme-redis.DATABASE_URL}
+
+  - name: beat
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      repo: <your-org>/<repo>
+      branch: main
+      deploy_on_push: true
+    run_command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${pickme-db.DATABASE_URL}
+      - key: REDIS_URL
+        scope: RUN_TIME
+        value: ${pickme-redis.DATABASE_URL}
+
+jobs:
+  - name: migrate
+    kind: PRE_DEPLOY
+    dockerfile_path: Dockerfile
+    source_dir: /
+    github:
+      repo: <your-org>/<repo>
+      branch: main
+    run_command: python manage.py migrate --noinput
+    instance_size_slug: basic-xxs
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${pickme-db.DATABASE_URL}
+
+# App-wide envs shared by every component. SECRET values are set in the
+# dashboard / `doctl` (never commit them) — the empty values here are markers.
+envs:
+  - key: DEBUG
+    value: "False"
+  - key: DJANGO_SECRET_KEY
+    type: SECRET
+    value: ""
+  - key: CELERY_TASK_ALWAYS_EAGER
+    value: "False"
+  # Clerk
+  - key: CLERK_ISSUER
+    value: ""
+  - key: CLERK_WEBHOOK_SIGNING_SECRET
+    type: SECRET
+    value: ""
+  # Media (Cloudinary)
+  - key: CLOUDINARY_BACKEND
+    value: cloudinary
+  - key: CLOUDINARY_CLOUD_NAME
+    value: ""
+  - key: CLOUDINARY_API_KEY
+    type: SECRET
+    value: ""
+  - key: CLOUDINARY_API_SECRET
+    type: SECRET
+    value: ""
+  # Maps + push (flip to real providers in prod)
+  - key: MAPS_BACKEND
+    value: google
+  - key: GOOGLE_MAPS_API_KEY
+    type: SECRET
+    value: ""
+  - key: PUSH_BACKEND
+    value: expo

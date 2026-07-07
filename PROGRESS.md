@@ -60,7 +60,8 @@
 - [x] Recipients = trip guardians (driver + stop-child families + group members) minus the raiser (`notifications.recipients.trip_recipients`)
 - [x] Tests: guardian fan-out (raiser/outsider excluded), immediate push + `delivered_at`, WS broadcast to trip channel, list scoping, resolve, raise/resolve authorization (7 tests)
 
-## Stage 9 — Media, polish, deploy
-- [ ] Cloudinary integration
-- [ ] OpenAPI schema export (`schema/openapi.yaml`)
-- [ ] DigitalOcean App Platform deploy
+## Stage 9 — Media, polish, deploy ✅ (deploy = config only)
+- [x] Cloudinary integration (`core/cloudinary.py`, `CLOUDINARY_BACKEND=fake|cloudinary`, no new dep — `requests`+`hashlib`): `POST /children/{id}/photo/` (proxy upload) + `POST /media/signature/` (client-direct signed upload for chat attachments)
+- [x] OpenAPI: `drf-spectacular` schema at `/api/v1/schema/` (+ swagger-ui/redoc), Clerk Bearer scheme registered (0 errors), exported to `schema/openapi.yaml`
+- [x] DigitalOcean App Platform spec (`.do/app.yaml`): web (ASGI) + worker + beat + PRE_DEPLOY migrate job + managed Postgres/Redis (deploy is config; not executed here)
+- [x] Tests: media signature (auth + shape), child photo upload (file/url/validation/scoping) (7 tests)

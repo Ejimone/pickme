@@ -1,0 +1,3552 @@
+openapi: 3.0.3
+info:
+  title: School Pickup Coordinator API
+  version: 1.0.0
+paths:
+  /api/v1/activities/{id}/:
+    get:
+      operationId: activities_retrieve
+      description: 'Flat routes per API-DESIGN.md: PATCH/DELETE /activities/{id}/.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - activities
+      security:
+      - ClerkJWT: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+          description: ''
+    put:
+      operationId: activities_update
+      description: 'Flat routes per API-DESIGN.md: PATCH/DELETE /activities/{id}/.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - activities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Activity'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Activity'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Activity'
+        required: true
+      security:
+      - ClerkJWT: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+          description: ''
+    patch:
+      operationId: activities_partial_update
+      description: 'Flat routes per API-DESIGN.md: PATCH/DELETE /activities/{id}/.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - activities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedActivity'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedActivity'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedActivity'
+      security:
+      - ClerkJWT: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+          description: ''
+    delete:
+      operationId: activities_destroy
+      description: 'Flat routes per API-DESIGN.md: PATCH/DELETE /activities/{id}/.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - activities
+      security:
+      - ClerkJWT: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/assignments/{id}/:
+    get:
+      operationId: assignments_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - assignments
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+          description: ''
+    patch:
+      operationId: assignments_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - assignments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignment'
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+          description: ''
+  /api/v1/assignments/{id}/confirm/:
+    post:
+      operationId: assignments_confirm_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - assignments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+          description: ''
+  /api/v1/assignments/{id}/swap-requests/:
+    post:
+      operationId: assignments_swap_requests_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - assignments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+          description: ''
+  /api/v1/carpool-groups/:
+    get:
+      operationId: carpool_groups_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - carpool-groups
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCarpoolGroupList'
+          description: ''
+    post:
+      operationId: carpool_groups_create
+      tags:
+      - carpool-groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+  /api/v1/carpool-groups/{id}/:
+    get:
+      operationId: carpool_groups_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - carpool-groups
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+  /api/v1/carpool-groups/{id}/assignments/:
+    get:
+      operationId: carpool_groups_assignments_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - carpool-groups
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+  /api/v1/carpool-groups/{id}/assignments/generate/:
+    post:
+      operationId: carpool_groups_assignments_generate_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - carpool-groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+  /api/v1/carpool-groups/{id}/members/:
+    get:
+      operationId: carpool_groups_members_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - carpool-groups
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+  /api/v1/carpool-groups/{id}/members/{member_id}/:
+    delete:
+      operationId: carpool_groups_members_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: member_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - carpool-groups
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '204':
+          description: No response body
+  /api/v1/carpool-groups/{id}/rotation-rule/:
+    get:
+      operationId: carpool_groups_rotation_rule_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - carpool-groups
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+    put:
+      operationId: carpool_groups_rotation_rule_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - carpool-groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+  /api/v1/carpool-groups/join/:
+    post:
+      operationId: carpool_groups_join_create
+      tags:
+      - carpool-groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+  /api/v1/chat-threads/:
+    get:
+      operationId: chat_threads_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - chat-threads
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChatThreadList'
+          description: ''
+  /api/v1/chat-threads/{id}/:
+    get:
+      operationId: chat_threads_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - chat-threads
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatThread'
+          description: ''
+  /api/v1/chat-threads/{id}/messages/:
+    get:
+      operationId: chat_threads_messages_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - chat-threads
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatThread'
+          description: ''
+    post:
+      operationId: chat_threads_messages_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - chat-threads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatThread'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChatThread'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChatThread'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatThread'
+          description: ''
+  /api/v1/chat-threads/{id}/read/:
+    post:
+      operationId: chat_threads_read_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - chat-threads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatThread'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChatThread'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChatThread'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatThread'
+          description: ''
+  /api/v1/children/:
+    get:
+      operationId: children_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - children
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChildList'
+          description: ''
+    post:
+      operationId: children_create
+      tags:
+      - children
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Child'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Child'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Child'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+          description: ''
+  /api/v1/children/{id}/:
+    get:
+      operationId: children_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - children
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+          description: ''
+    put:
+      operationId: children_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - children
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Child'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Child'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Child'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+          description: ''
+    patch:
+      operationId: children_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - children
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChild'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedChild'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedChild'
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+          description: ''
+    delete:
+      operationId: children_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - children
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '204':
+          description: No response body
+  /api/v1/children/{id}/activities/:
+    get:
+      operationId: children_activities_retrieve
+      description: GET/POST /children/{child_id}/activities/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - children
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+          description: ''
+    post:
+      operationId: children_activities_create
+      description: GET/POST /children/{child_id}/activities/
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - children
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Child'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Child'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Child'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+          description: ''
+  /api/v1/children/{id}/photo/:
+    post:
+      operationId: children_photo_create
+      description: |-
+        POST /children/{id}/photo/ — set the child's avatar.
+
+        Accepts a multipart `file` (proxied to Cloudinary, per API-DESIGN.md) or
+        an already-hosted `photo_url` (e.g. after a client-side signed upload via
+        /media/signature/). Stores the resulting URL and returns the child.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - children
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Child'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Child'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Child'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+          description: ''
+  /api/v1/device-tokens/:
+    post:
+      operationId: device_tokens_create
+      description: |-
+        `POST /device-tokens/` (register, idempotent per token) and
+        `DELETE /device-tokens/{id}/` (logout).
+      tags:
+      - device-tokens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceToken'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeviceToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DeviceToken'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceToken'
+          description: ''
+  /api/v1/device-tokens/{id}/:
+    delete:
+      operationId: device_tokens_destroy
+      description: |-
+        `POST /device-tokens/` (register, idempotent per token) and
+        `DELETE /device-tokens/{id}/` (logout).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - device-tokens
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '204':
+          description: No response body
+  /api/v1/families/:
+    get:
+      operationId: families_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - families
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFamilyList'
+          description: ''
+    post:
+      operationId: families_create
+      tags:
+      - families
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Family'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Family'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Family'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+          description: ''
+  /api/v1/families/{id}/:
+    get:
+      operationId: families_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - families
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+          description: ''
+    put:
+      operationId: families_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - families
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Family'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Family'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Family'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+          description: ''
+    patch:
+      operationId: families_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - families
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFamily'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFamily'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFamily'
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+          description: ''
+  /api/v1/families/{id}/members/:
+    get:
+      operationId: families_members_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - families
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+          description: ''
+  /api/v1/families/{id}/members/{member_id}/:
+    delete:
+      operationId: families_members_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: member_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - families
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '204':
+          description: No response body
+  /api/v1/families/{id}/members/invite/:
+    post:
+      operationId: families_members_invite_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - families
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Family'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Family'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Family'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+          description: ''
+  /api/v1/family-invites/accept/:
+    post:
+      operationId: family_invites_accept_create
+      description: 'POST /family-invites/accept/ {"token": "..."} — joins the family.'
+      tags:
+      - family-invites
+<<<<<<< HEAD
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteAccept'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InviteAccept'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InviteAccept'
+        required: true
+      security:
+      - ClerkJWT: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+=======
+      responses:
+        '200':
+          description: No response body
+>>>>>>> refs/remotes/origin/main
+  /api/v1/health/:
+    get:
+      operationId: health_retrieve
+      tags:
+      - health
+      security:
+      - {}
+      responses:
+        '200':
+<<<<<<< HEAD
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+=======
+          description: No response body
+>>>>>>> refs/remotes/origin/main
+  /api/v1/media/signature/:
+    post:
+      operationId: media_signature_create
+      description: |-
+        POST /media/signature/ — short-lived Cloudinary signed-upload params so
+        the client can upload directly (chat attachments, avatars). The API secret
+        never leaves the server; the client POSTs the file to `upload_url` with the
+        returned fields, then sends us the resulting secure URL.
+
+        Body (optional): { "folder": "chat", "resource_type": "image" }
+      tags:
+      - media
+<<<<<<< HEAD
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: {}
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: {}
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: {}
+      security:
+      - ClerkJWT: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+=======
+      responses:
+        '200':
+          description: No response body
+>>>>>>> refs/remotes/origin/main
+  /api/v1/notification-preferences/:
+    get:
+      operationId: notification_preferences_list
+      description: |-
+        `GET /notification-preferences/` lists a row for every type (defaults
+        for any the user hasn't customized). `PATCH /notification-preferences/
+        {type}/` updates channel toggles, materializing the row on first touch.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - notification-preferences
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationPreferenceList'
+          description: ''
+  /api/v1/notification-preferences/{notification_type}/:
+    patch:
+      operationId: notification_preferences_partial_update
+      description: |-
+        `GET /notification-preferences/` lists a row for every type (defaults
+        for any the user hasn't customized). `PATCH /notification-preferences/
+        {type}/` updates channel toggles, materializing the row on first touch.
+      parameters:
+      - in: path
+        name: notification_type
+        schema:
+          type: string
+          pattern: ^[a-z_]+$
+        required: true
+      tags:
+      - notification-preferences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationPreference'
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+  /api/v1/notifications/:
+    get:
+      operationId: notifications_list
+      description: |-
+        `GET /notifications/` (own, `?is_read=` filter) and
+        `POST /notifications/{id}/read/`.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - notifications
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNotificationList'
+          description: ''
+  /api/v1/notifications/{id}/read/:
+    post:
+      operationId: notifications_read_create
+      description: |-
+        `GET /notifications/` (own, `?is_read=` filter) and
+        `POST /notifications/{id}/read/`.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/v1/pickup-events/:
+    get:
+      operationId: pickup_events_list
+      description: |-
+        The "Today" view — one PickupEvent row per child across all of a
+        family's children/schools — plus manual status/method overrides.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - pickup-events
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPickupEventList'
+          description: ''
+  /api/v1/pickup-events/{id}/:
+    get:
+      operationId: pickup_events_retrieve
+      description: |-
+        The "Today" view — one PickupEvent row per child across all of a
+        family's children/schools — plus manual status/method overrides.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - pickup-events
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupEvent'
+          description: ''
+    patch:
+      operationId: pickup_events_partial_update
+      description: |-
+        The "Today" view — one PickupEvent row per child across all of a
+        family's children/schools — plus manual status/method overrides.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - pickup-events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPickupEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPickupEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPickupEvent'
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupEvent'
+          description: ''
+  /api/v1/schools/:
+    get:
+      operationId: schools_list
+      description: 'Shared reference data: any authenticated user can list, add, edit.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - schools
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSchoolList'
+          description: ''
+    post:
+      operationId: schools_create
+      description: 'Shared reference data: any authenticated user can list, add, edit.'
+      tags:
+      - schools
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/School'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/School'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/School'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+          description: ''
+  /api/v1/schools/{id}/:
+    get:
+      operationId: schools_retrieve
+      description: 'Shared reference data: any authenticated user can list, add, edit.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this school.
+        required: true
+      tags:
+      - schools
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+          description: ''
+    put:
+      operationId: schools_update
+      description: 'Shared reference data: any authenticated user can list, add, edit.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this school.
+        required: true
+      tags:
+      - schools
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/School'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/School'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/School'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+          description: ''
+    patch:
+      operationId: schools_partial_update
+      description: 'Shared reference data: any authenticated user can list, add, edit.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this school.
+        required: true
+      tags:
+      - schools
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSchool'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSchool'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSchool'
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+          description: ''
+  /api/v1/schools/{id}/calendar-exceptions/:
+    get:
+      operationId: schools_calendar_exceptions_retrieve
+      description: 'Shared reference data: any authenticated user can list, add, edit.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this school.
+        required: true
+      tags:
+      - schools
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+          description: ''
+    post:
+      operationId: schools_calendar_exceptions_create
+      description: 'Shared reference data: any authenticated user can list, add, edit.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this school.
+        required: true
+      tags:
+      - schools
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/School'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/School'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/School'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/School'
+          description: ''
+  /api/v1/sos-alerts/:
+    get:
+      operationId: sos_alerts_list
+      description: |-
+        Raise/list/resolve emergency alerts. Raising fans out immediately to
+        every guardian on the trip (see trips.sos.fan_out_sos).
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - sos-alerts
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSOSAlertList'
+          description: ''
+    post:
+      operationId: sos_alerts_create
+      description: |-
+        Raise/list/resolve emergency alerts. Raising fans out immediately to
+        every guardian on the trip (see trips.sos.fan_out_sos).
+      tags:
+      - sos-alerts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SOSAlertCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SOSAlertCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SOSAlertCreate'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SOSAlertCreate'
+          description: ''
+  /api/v1/sos-alerts/{id}/resolve/:
+    post:
+      operationId: sos_alerts_resolve_create
+      description: |-
+        Raise/list/resolve emergency alerts. Raising fans out immediately to
+        every guardian on the trip (see trips.sos.fan_out_sos).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sos-alerts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SOSAlert'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SOSAlert'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SOSAlert'
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SOSAlert'
+          description: ''
+  /api/v1/swap-requests/{id}/respond/:
+    post:
+      operationId: swap_requests_respond_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - swap-requests
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SwapRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SwapRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SwapRequest'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SwapRequest'
+          description: ''
+  /api/v1/trips/:
+    get:
+      operationId: trips_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - trips
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTripList'
+          description: ''
+    post:
+      operationId: trips_create
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TripCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TripCreate'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripCreate'
+          description: ''
+  /api/v1/trips/{id}/:
+    get:
+      operationId: trips_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - trips
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+  /api/v1/trips/{id}/end/:
+    post:
+      operationId: trips_end_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trip'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Trip'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Trip'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+  /api/v1/trips/{id}/location/:
+    post:
+      operationId: trips_location_create
+      description: |-
+        REST fallback ping — primary path is the WebSocket; this exists
+        for spotty-connectivity retries.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trip'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Trip'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Trip'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+  /api/v1/trips/{id}/location/latest/:
+    get:
+      operationId: trips_location_latest_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - trips
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+  /api/v1/trips/{id}/start/:
+    post:
+      operationId: trips_start_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trip'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Trip'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Trip'
+        required: true
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+  /api/v1/trips/{id}/stops/{stop_id}/:
+    patch:
+      operationId: trips_stops_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: stop_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - trips
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTrip'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTrip'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTrip'
+<<<<<<< HEAD
+      security:
+      - ClerkJWT: []
+=======
+>>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          description: ''
+components:
+  schemas:
+    Activity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        child:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        day_of_week:
+          allOf:
+          - $ref: '#/components/schemas/DayOfWeekEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        location_name:
+          type: string
+          maxLength: 255
+        location_lat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        location_lng:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - child
+      - created_at
+      - day_of_week
+      - end_time
+      - id
+      - name
+      - start_time
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        carpool_group:
+          type: string
+          format: uuid
+          readOnly: true
+        date:
+          type: string
+          format: date
+          readOnly: true
+        driver_family:
+          type: string
+          format: uuid
+        driver_family_name:
+          type: string
+          readOnly: true
+        driver_user:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentStatusEnum'
+          readOnly: true
+        is_auto_suggested:
+          type: boolean
+          readOnly: true
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - carpool_group
+      - created_at
+      - date
+      - driver_family
+      - driver_family_name
+      - id
+      - is_auto_suggested
+      - status
+      - updated_at
+    AssignmentStatusEnum:
+      enum:
+      - suggested
+      - confirmed
+      - swap_pending
+      - completed
+      - cancelled
+      type: string
+      description: |-
+        * `suggested` - Suggested
+        * `confirmed` - Confirmed
+        * `swap_pending` - Swap Pending
+        * `completed` - Completed
+        * `cancelled` - Cancelled
+    CarpoolGroup:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        school:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 255
+        invite_code:
+          type: string
+          readOnly: true
+        created_by:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        family:
+          type: string
+          format: uuid
+          writeOnly: true
+      required:
+      - created_at
+      - created_by
+      - family
+      - id
+      - invite_code
+      - name
+      - school
+    ChatThread:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        context_type:
+          $ref: '#/components/schemas/ContextTypeEnum'
+        carpool_group:
+          type: string
+          format: uuid
+          nullable: true
+        trip:
+          type: string
+          format: uuid
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - context_type
+      - created_at
+      - id
+    Child:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        family:
+          type: string
+          format: uuid
+        school:
+          type: string
+          format: uuid
+          nullable: true
+        full_name:
+          type: string
+          maxLength: 255
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        grade:
+          type: string
+          nullable: true
+          maxLength: 32
+        photo_url:
+          nullable: true
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        color_tag:
+          type: string
+          nullable: true
+          maxLength: 9
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - family
+      - full_name
+      - id
+    ContextTypeEnum:
+      enum:
+      - carpool_group
+      - trip
+      type: string
+      description: |-
+        * `carpool_group` - Carpool Group
+        * `trip` - Trip
+    DayOfWeekEnum:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      type: integer
+      description: |-
+        * `0` - 0
+        * `1` - 1
+        * `2` - 2
+        * `3` - 3
+        * `4` - 4
+        * `5` - 5
+        * `6` - 6
+    DeviceToken:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        token:
+          type: string
+          maxLength: 255
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - platform
+      - token
+    Family:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        created_by:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        member_count:
+          type: integer
+          readOnly: true
+      required:
+      - created_at
+      - created_by
+      - id
+      - member_count
+      - name
+<<<<<<< HEAD
+    InviteAccept:
+      type: object
+      properties:
+        token:
+          type: string
+          format: uuid
+      required:
+      - token
+=======
+>>>>>>> refs/remotes/origin/main
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        type:
+          allOf:
+          - $ref: '#/components/schemas/TypeEnum'
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        data:
+          readOnly: true
+          nullable: true
+        is_read:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - body
+      - created_at
+      - data
+      - id
+      - is_read
+      - title
+      - type
+    NotificationPreference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        notification_type:
+          allOf:
+          - $ref: '#/components/schemas/NotificationTypeEnum'
+          readOnly: true
+        push_enabled:
+          type: boolean
+        sms_enabled:
+          type: boolean
+        email_enabled:
+          type: boolean
+      required:
+      - id
+      - notification_type
+    NotificationTypeEnum:
+      enum:
+      - pickup_reminder
+      - driver_arrived
+      - swap_request
+      - chat_message
+      - schedule_change
+      - sos
+      type: string
+      description: |-
+        * `pickup_reminder` - Pickup Reminder
+        * `driver_arrived` - Driver Arrived
+        * `swap_request` - Swap Request
+        * `chat_message` - Chat Message
+        * `schedule_change` - Schedule Change
+        * `sos` - Sos
+    PaginatedCarpoolGroupList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CarpoolGroup'
+    PaginatedChatThreadList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatThread'
+    PaginatedChildList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Child'
+    PaginatedFamilyList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Family'
+    PaginatedNotificationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+    PaginatedNotificationPreferenceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationPreference'
+    PaginatedPickupEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PickupEvent'
+    PaginatedSOSAlertList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SOSAlert'
+    PaginatedSchoolList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/School'
+    PaginatedTripList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trip'
+    PatchedActivity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        child:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        day_of_week:
+          allOf:
+          - $ref: '#/components/schemas/DayOfWeekEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        location_name:
+          type: string
+          maxLength: 255
+        location_lat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        location_lng:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        carpool_group:
+          type: string
+          format: uuid
+          readOnly: true
+        date:
+          type: string
+          format: date
+          readOnly: true
+        driver_family:
+          type: string
+          format: uuid
+        driver_family_name:
+          type: string
+          readOnly: true
+        driver_user:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentStatusEnum'
+          readOnly: true
+        is_auto_suggested:
+          type: boolean
+          readOnly: true
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedChild:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        family:
+          type: string
+          format: uuid
+        school:
+          type: string
+          format: uuid
+          nullable: true
+        full_name:
+          type: string
+          maxLength: 255
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+        grade:
+          type: string
+          nullable: true
+          maxLength: 32
+        photo_url:
+          nullable: true
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        color_tag:
+          type: string
+          nullable: true
+          maxLength: 9
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedFamily:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        created_by:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        member_count:
+          type: integer
+          readOnly: true
+    PatchedNotificationPreference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        notification_type:
+          allOf:
+          - $ref: '#/components/schemas/NotificationTypeEnum'
+          readOnly: true
+        push_enabled:
+          type: boolean
+        sms_enabled:
+          type: boolean
+        email_enabled:
+          type: boolean
+    PatchedPickupEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        child:
+          type: string
+          format: uuid
+          readOnly: true
+        child_name:
+          type: string
+          readOnly: true
+        date:
+          type: string
+          format: date
+          readOnly: true
+        pickup_method:
+          $ref: '#/components/schemas/PickupMethodEnum'
+        carpool_assignment:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        trip_stop_child:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        status:
+          $ref: '#/components/schemas/PickupEventStatusEnum'
+        scheduled_time:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedSchool:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        address:
+          type: string
+          maxLength: 512
+        lat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        lng:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        timezone:
+          type: string
+          maxLength: 64
+        default_dismissal_time:
+          type: string
+          format: time
+        early_dismissal_days:
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          maxLength: 32
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedTrip:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        driver:
+          type: string
+          format: uuid
+          readOnly: true
+        driver_name:
+          type: string
+          readOnly: true
+        carpool_group:
+          type: string
+          format: uuid
+          nullable: true
+        date:
+          type: string
+          format: date
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TripStatusEnum'
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        tracking_mode:
+          $ref: '#/components/schemas/TrackingModeEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripStop'
+          readOnly: true
+    PickupEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        child:
+          type: string
+          format: uuid
+          readOnly: true
+        child_name:
+          type: string
+          readOnly: true
+        date:
+          type: string
+          format: date
+          readOnly: true
+        pickup_method:
+          $ref: '#/components/schemas/PickupMethodEnum'
+        carpool_assignment:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        trip_stop_child:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        status:
+          $ref: '#/components/schemas/PickupEventStatusEnum'
+        scheduled_time:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - carpool_assignment
+      - child
+      - child_name
+      - created_at
+      - date
+      - id
+      - scheduled_time
+      - trip_stop_child
+    PickupEventStatusEnum:
+      enum:
+      - scheduled
+      - en_route
+      - arrived
+      - picked_up
+      - missed
+      - cancelled
+      type: string
+      description: |-
+        * `scheduled` - Scheduled
+        * `en_route` - En Route
+        * `arrived` - Arrived
+        * `picked_up` - Picked Up
+        * `missed` - Missed
+        * `cancelled` - Cancelled
+    PickupMethodEnum:
+      enum:
+      - parent
+      - carpool
+      - aftercare
+      - bus
+      - walker
+      type: string
+      description: |-
+        * `parent` - Parent
+        * `carpool` - Carpool
+        * `aftercare` - Aftercare
+        * `bus` - Bus
+        * `walker` - Walker
+    PlatformEnum:
+      enum:
+      - ios
+      - android
+      type: string
+      description: |-
+        * `ios` - Ios
+        * `android` - Android
+    SOSAlert:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        trip:
+          type: string
+          format: uuid
+          nullable: true
+        raised_by:
+          type: string
+          format: uuid
+          readOnly: true
+        lat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        lng:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SOSAlertStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resolved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        resolved_by:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+      required:
+      - created_at
+      - id
+      - raised_by
+      - resolved_at
+      - resolved_by
+      - status
+    SOSAlertCreate:
+      type: object
+      properties:
+        trip:
+          type: string
+          format: uuid
+        lat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        lng:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        message:
+          type: string
+          nullable: true
+      required:
+      - trip
+    SOSAlertStatusEnum:
+      enum:
+      - active
+      - resolved
+      type: string
+      description: |-
+        * `active` - Active
+        * `resolved` - Resolved
+    School:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        address:
+          type: string
+          maxLength: 512
+        lat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        lng:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        timezone:
+          type: string
+          maxLength: 64
+        default_dismissal_time:
+          type: string
+          format: time
+        early_dismissal_days:
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          maxLength: 32
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - created_at
+      - default_dismissal_time
+      - id
+      - name
+    SwapRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        assignment:
+          type: string
+          format: uuid
+          readOnly: true
+        requested_by:
+          type: string
+          format: uuid
+          readOnly: true
+        target_family:
+          type: string
+          format: uuid
+        target_family_name:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SwapRequestStatusEnum'
+          readOnly: true
+        reason:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resolved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - assignment
+      - created_at
+      - id
+      - requested_by
+      - resolved_at
+      - status
+      - target_family
+      - target_family_name
+    SwapRequestStatusEnum:
+      enum:
+      - pending
+      - accepted
+      - rejected
+      - expired
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `accepted` - Accepted
+        * `rejected` - Rejected
+        * `expired` - Expired
+    TrackingModeEnum:
+      enum:
+      - live_gps
+      - status_only
+      type: string
+      description: |-
+        * `live_gps` - Live Gps
+        * `status_only` - Status Only
+    Trip:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        driver:
+          type: string
+          format: uuid
+          readOnly: true
+        driver_name:
+          type: string
+          readOnly: true
+        carpool_group:
+          type: string
+          format: uuid
+          nullable: true
+        date:
+          type: string
+          format: date
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TripStatusEnum'
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        tracking_mode:
+          $ref: '#/components/schemas/TrackingModeEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripStop'
+          readOnly: true
+      required:
+      - created_at
+      - date
+      - driver
+      - driver_name
+      - ended_at
+      - id
+      - started_at
+      - status
+      - stops
+    TripCreate:
+      type: object
+      properties:
+        carpool_group:
+          type: string
+          format: uuid
+          nullable: true
+        date:
+          type: string
+          format: date
+        tracking_mode:
+          $ref: '#/components/schemas/TrackingModeEnum'
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripStopCreate'
+      required:
+      - date
+      - stops
+    TripStatusEnum:
+      enum:
+      - not_started
+      - in_progress
+      - completed
+      - cancelled
+      type: string
+      description: |-
+        * `not_started` - Not Started
+        * `in_progress` - In Progress
+        * `completed` - Completed
+        * `cancelled` - Cancelled
+    TripStop:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        school:
+          type: string
+          format: uuid
+          nullable: true
+        activity:
+          type: string
+          format: uuid
+          nullable: true
+        sequence_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        eta:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TripStopStatusEnum'
+          readOnly: true
+        actual_arrival_time:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripStopChild'
+          readOnly: true
+      required:
+      - actual_arrival_time
+      - children
+      - eta
+      - id
+      - sequence_order
+      - status
+    TripStopChild:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        child:
+          type: string
+          format: uuid
+        child_name:
+          type: string
+          readOnly: true
+        picked_up_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - child
+      - child_name
+      - id
+      - picked_up_at
+    TripStopCreate:
+      type: object
+      properties:
+        school:
+          type: string
+          format: uuid
+          nullable: true
+        activity:
+          type: string
+          format: uuid
+          nullable: true
+        sequence_order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        children:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - children
+      - sequence_order
+    TripStopStatusEnum:
+      enum:
+      - pending
+      - en_route
+      - arrived
+      - picked_up
+      - skipped
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `en_route` - En Route
+        * `arrived` - Arrived
+        * `picked_up` - Picked Up
+        * `skipped` - Skipped
+    TypeEnum:
+      enum:
+      - pickup_reminder
+      - driver_arrived
+      - swap_request
+      - chat_message
+      - schedule_change
+      - sos
+      type: string
+      description: |-
+        * `pickup_reminder` - Pickup Reminder
+        * `driver_arrived` - Driver Arrived
+        * `swap_request` - Swap Request
+        * `chat_message` - Chat Message
+        * `schedule_change` - Schedule Change
+        * `sos` - Sos
+<<<<<<< HEAD
+  securitySchemes:
+    ClerkJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Clerk session JWT. In Expo: `await getToken()`.'
+=======
+>>>>>>> refs/remotes/origin/main

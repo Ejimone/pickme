@@ -616,6 +616,20 @@ Register the Expo push token right after permission is granted; delete on
 sign-out. Push only actually sends when the backend runs with `PUSH_BACKEND=expo`
 (dev default is `fake`, which no-ops).
 
+### Media (Cloudinary)
+```
+POST /children/{id}/photo/     # multipart file field "file" → uploads, stores, returns Child
+        # or JSON { "photo_url": "https://res.cloudinary.com/..." } for an already-hosted image
+POST /media/signature/   { "folder": "chat", "resource_type": "image" }
+        → { cloud_name, api_key, timestamp, folder, signature, resource_type, upload_url }
+```
+`/media/signature/` gives you short-lived signed params to upload **directly**
+from the app to Cloudinary (the API secret never leaves the server) — use it for
+chat attachments: POST the file to `upload_url` with those fields, get back a
+`secure_url`, then send the message with `attachment_url` set. For avatars you
+can either use the same direct flow then `PATCH`/`POST .../photo/ {photo_url}`,
+or just POST the raw file to `/children/{id}/photo/` and let the backend proxy it.
+
 ### SOS
 ```
 POST /sos-alerts/   { "trip": "<id>", "lat": 41.878, "lng": -87.63, "message": "flat tire, kids safe" }
@@ -755,14 +769,14 @@ trip-channel WS) and bypasses the deferred queue.
 
 - **No `/me` endpoint** returning the local `User` UUID — see §1. The single
   most likely thing you'll need added early (blocks the notification socket).
-- **Media upload isn't wired yet (Stage 9).** `Child.photo_url` and
-  `ChatMessage.attachment_url` are plain URL fields today; the Cloudinary
-  **signed-upload** endpoint isn't built. For now you can only set already-hosted
-  URLs. Planned: the frontend uploads via an Expo image picker to a Cloudinary
-  preset (or a backend-signed upload) and sends back the resulting URL.
-- **No OpenAPI schema exported yet (Stage 9).** `drf-spectacular` is installed;
-  once `schema/openapi.yaml` is exported it becomes the source for your
-  `openapi-fetch` types. Until then, hand-type against §4 (or ask for the export).
+- **Media upload is wired (Cloudinary).** Use `POST /children/{id}/photo/`
+  (proxy) or `POST /media/signature/` (client-direct signed upload) — see §8.
+  Backend defaults to a `fake` Cloudinary backend in dev (`CLOUDINARY_BACKEND`);
+  set it to `cloudinary` with real creds to actually store assets.
+- **OpenAPI schema is exported** to `schema/openapi.yaml`, and served live at
+  `/api/v1/schema/` (+ `/api/v1/schema/swagger-ui/`, `/redoc/`). Point
+  `openapi-fetch`/`orval` at it to generate your typed client; the Clerk Bearer
+  scheme is included so Swagger's "Authorize" works.
 - **SMS/email notification channels are modeled but inert** — only
   `push_enabled` currently affects delivery.
 - **Push needs `PUSH_BACKEND=expo`** on the backend to actually reach Expo; dev
