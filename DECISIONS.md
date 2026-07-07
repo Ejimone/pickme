@@ -308,3 +308,28 @@ Choices made where the spec docs (`instructions/`) were silent.
   a `PRE_DEPLOY` `migrate` job — plus managed Postgres + Redis (Redis backs the
   Celery broker, the Channels layer, and the ETA throttle). Secrets are set in
   the DO dashboard/`doctl`, never committed.
+
+## Carpool group invites & leaving (frontend-requested)
+
+- **`CarpoolGroupInvite` mirrors `FamilyInvite`** (`carpool/models.py`): pending
+  email + unique `token`, partial-unique on `(group, email)` where
+  `status="pending"` so re-inviting the same pending email resends (via
+  `get_or_create`) instead of duplicating. FK is named `group` (matches the
+  frontend's expected `"group"` response key), related_name `invites`.
+- **`POST /carpool-groups/{id}/invite/`** is admin-only (reuses the viewset's
+  `_require_admin`). The email carries **both** the group's `invite_code` (for
+  "Join with a code") and a `pickme://carpool/accept?token=…` deep link, via the
+  same mail backend as family invites (console in dev, locmem in tests).
+- **`POST /carpool-group-invites/accept/`** is a standalone `APIView` mirroring
+  `families.InviteAcceptView`: validates a pending token, `get_or_create`s the
+  caller's family as a `member` (idempotent), marks the invite accepted.
+- **Leave — last-admin rule: auto-promote, not 409.** `POST /carpool-groups/
+  {id}/leave/` removes the caller's family; if that family was the only admin
+  and other members remain, the **oldest remaining member is promoted to
+  admin**. Chosen over the 409 block option for smoother mobile UX (no
+  dead-end); if they're the last member the membership is just deleted (the
+  empty group is left intact).
+- **`CarpoolGroupSerializer` gained `member_count` (SerializerMethodField) and
+  `school_name`** so group cards render "N families" + the school without extra
+  round-trips. `member_count` is a method (not an annotation) so it's correct on
+  single-object responses (create/join/accept) too.

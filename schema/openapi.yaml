@@ -114,11 +114,8 @@ paths:
         required: true
       tags:
       - assignments
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -147,11 +144,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedAssignment'
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -182,11 +176,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Assignment'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -217,17 +208,47 @@ paths:
             schema:
               $ref: '#/components/schemas/Assignment'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Assignment'
+          description: ''
+  /api/v1/carpool-group-invites/accept/:
+    post:
+      operationId: carpool_group_invites_accept_create
+      description: |-
+        POST /carpool-group-invites/accept/ {"token","family"} — join by token.
+
+        Mirrors families.InviteAcceptView: validates a pending token, adds the
+        caller's family to the group as a member (idempotent), marks the invite
+        accepted.
+      tags:
+      - carpool-group-invites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarpoolInviteAccept'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CarpoolInviteAccept'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarpoolInviteAccept'
+        required: true
+      security:
+      - ClerkJWT: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
           description: ''
   /api/v1/carpool-groups/:
     get:
@@ -247,11 +268,8 @@ paths:
           type: integer
       tags:
       - carpool-groups
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -275,11 +293,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CarpoolGroup'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '201':
           content:
@@ -298,11 +313,8 @@ paths:
         required: true
       tags:
       - carpool-groups
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -321,11 +333,8 @@ paths:
         required: true
       tags:
       - carpool-groups
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -356,11 +365,85 @@ paths:
             schema:
               $ref: '#/components/schemas/CarpoolGroup'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+  /api/v1/carpool-groups/{id}/invite/:
+    post:
+      operationId: carpool_groups_invite_create
+      description: |-
+        POST /carpool-groups/{id}/invite/ — admin emails a parent an invite.
+
+        Mirrors the family-invite flow: the email carries both the group's
+        invite_code (to type into "Join with a code") and a deep link for
+        one-tap accept. Re-inviting a still-pending email resends, not
+        duplicates (get_or_create on the pending row).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - carpool-groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+        required: true
+      security:
+      - ClerkJWT: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarpoolGroup'
+          description: ''
+  /api/v1/carpool-groups/{id}/leave/:
+    post:
+      operationId: carpool_groups_leave_create
+      description: |-
+        POST /carpool-groups/{id}/leave/ — remove the caller's family.
+
+        Last-admin handling: if the leaving family is the only admin and other
+        members remain, the oldest remaining member is auto-promoted to admin
+        (chosen over a 409 block for smoother mobile UX — see DECISIONS.md).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - carpool-groups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarpoolGroup'
+        required: true
+      security:
+      - ClerkJWT: []
       responses:
         '200':
           content:
@@ -379,11 +462,8 @@ paths:
         required: true
       tags:
       - carpool-groups
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -407,11 +487,8 @@ paths:
         required: true
       tags:
       - carpool-groups
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '204':
           description: No response body
@@ -426,11 +503,8 @@ paths:
         required: true
       tags:
       - carpool-groups
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -460,11 +534,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CarpoolGroup'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -489,11 +560,8 @@ paths:
             schema:
               $ref: '#/components/schemas/CarpoolGroup'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -519,11 +587,8 @@ paths:
           type: integer
       tags:
       - chat-threads
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -542,11 +607,8 @@ paths:
         required: true
       tags:
       - chat-threads
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -565,11 +627,8 @@ paths:
         required: true
       tags:
       - chat-threads
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -599,11 +658,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ChatThread'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -634,11 +690,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ChatThread'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -664,11 +717,8 @@ paths:
           type: integer
       tags:
       - children
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -692,11 +742,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Child'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '201':
           content:
@@ -715,11 +762,8 @@ paths:
         required: true
       tags:
       - children
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -749,11 +793,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Child'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -782,11 +823,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedChild'
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -804,11 +842,8 @@ paths:
         required: true
       tags:
       - children
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '204':
           description: No response body
@@ -824,11 +859,8 @@ paths:
         required: true
       tags:
       - children
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -859,11 +891,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Child'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -900,11 +929,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Child'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -932,11 +958,8 @@ paths:
             schema:
               $ref: '#/components/schemas/DeviceToken'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '201':
           content:
@@ -958,11 +981,8 @@ paths:
         required: true
       tags:
       - device-tokens
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '204':
           description: No response body
@@ -984,11 +1004,8 @@ paths:
           type: integer
       tags:
       - families
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1012,11 +1029,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Family'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '201':
           content:
@@ -1035,11 +1049,8 @@ paths:
         required: true
       tags:
       - families
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1069,11 +1080,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Family'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1102,11 +1110,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedFamily'
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1125,11 +1130,8 @@ paths:
         required: true
       tags:
       - families
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1153,11 +1155,8 @@ paths:
         required: true
       tags:
       - families
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '204':
           description: No response body
@@ -1184,11 +1183,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Family'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1202,7 +1198,6 @@ paths:
       description: 'POST /family-invites/accept/ {"token": "..."} — joins the family.'
       tags:
       - family-invites
-<<<<<<< HEAD
       requestBody:
         content:
           application/json:
@@ -1225,11 +1220,6 @@ paths:
                 type: object
                 additionalProperties: {}
           description: ''
-=======
-      responses:
-        '200':
-          description: No response body
->>>>>>> refs/remotes/origin/main
   /api/v1/health/:
     get:
       operationId: health_retrieve
@@ -1239,16 +1229,12 @@ paths:
       - {}
       responses:
         '200':
-<<<<<<< HEAD
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: {}
           description: ''
-=======
-          description: No response body
->>>>>>> refs/remotes/origin/main
   /api/v1/media/signature/:
     post:
       operationId: media_signature_create
@@ -1261,7 +1247,6 @@ paths:
         Body (optional): { "folder": "chat", "resource_type": "image" }
       tags:
       - media
-<<<<<<< HEAD
       requestBody:
         content:
           application/json:
@@ -1286,11 +1271,6 @@ paths:
                 type: object
                 additionalProperties: {}
           description: ''
-=======
-      responses:
-        '200':
-          description: No response body
->>>>>>> refs/remotes/origin/main
   /api/v1/notification-preferences/:
     get:
       operationId: notification_preferences_list
@@ -1313,11 +1293,8 @@ paths:
           type: integer
       tags:
       - notification-preferences
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1352,11 +1329,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedNotificationPreference'
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1385,11 +1359,8 @@ paths:
           type: integer
       tags:
       - notifications
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1422,11 +1393,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Notification'
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1455,11 +1423,8 @@ paths:
           type: integer
       tags:
       - pickup-events
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1481,11 +1446,8 @@ paths:
         required: true
       tags:
       - pickup-events
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1517,11 +1479,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedPickupEvent'
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1554,11 +1513,8 @@ paths:
           type: string
       tags:
       - schools
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1583,11 +1539,8 @@ paths:
             schema:
               $ref: '#/components/schemas/School'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '201':
           content:
@@ -1609,11 +1562,8 @@ paths:
         required: true
       tags:
       - schools
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1646,11 +1596,8 @@ paths:
             schema:
               $ref: '#/components/schemas/School'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1682,11 +1629,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedSchool'
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1708,11 +1652,8 @@ paths:
         required: true
       tags:
       - schools
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1745,11 +1686,8 @@ paths:
             schema:
               $ref: '#/components/schemas/School'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1778,11 +1716,8 @@ paths:
           type: integer
       tags:
       - sos-alerts
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1809,11 +1744,8 @@ paths:
             schema:
               $ref: '#/components/schemas/SOSAlertCreate'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '201':
           content:
@@ -1846,11 +1778,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/SOSAlert'
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1881,11 +1810,8 @@ paths:
             schema:
               $ref: '#/components/schemas/SwapRequest'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1911,11 +1837,8 @@ paths:
           type: integer
       tags:
       - trips
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1939,11 +1862,8 @@ paths:
             schema:
               $ref: '#/components/schemas/TripCreate'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '201':
           content:
@@ -1962,11 +1882,8 @@ paths:
         required: true
       tags:
       - trips
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -1997,11 +1914,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Trip'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -2035,11 +1949,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Trip'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -2058,11 +1969,8 @@ paths:
         required: true
       tags:
       - trips
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -2093,11 +2001,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Trip'
         required: true
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -2132,11 +2037,8 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedTrip'
-<<<<<<< HEAD
       security:
       - ClerkJWT: []
-=======
->>>>>>> refs/remotes/origin/main
       responses:
         '200':
           content:
@@ -2273,10 +2175,16 @@ components:
         school:
           type: string
           format: uuid
+        school_name:
+          type: string
+          readOnly: true
         name:
           type: string
           maxLength: 255
         invite_code:
+          type: string
+          readOnly: true
+        member_count:
           type: string
           readOnly: true
         created_by:
@@ -2297,8 +2205,22 @@ components:
       - family
       - id
       - invite_code
+      - member_count
       - name
       - school
+      - school_name
+    CarpoolInviteAccept:
+      type: object
+      properties:
+        token:
+          type: string
+          format: uuid
+        family:
+          type: string
+          format: uuid
+      required:
+      - family
+      - token
     ChatThread:
       type: object
       properties:
@@ -2447,7 +2369,6 @@ components:
       - id
       - member_count
       - name
-<<<<<<< HEAD
     InviteAccept:
       type: object
       properties:
@@ -2456,8 +2377,6 @@ components:
           format: uuid
       required:
       - token
-=======
->>>>>>> refs/remotes/origin/main
     Notification:
       type: object
       properties:
@@ -3541,12 +3460,9 @@ components:
         * `chat_message` - Chat Message
         * `schedule_change` - Schedule Change
         * `sos` - Sos
-<<<<<<< HEAD
   securitySchemes:
     ClerkJWT:
       type: http
       scheme: bearer
       bearerFormat: JWT
       description: 'Clerk session JWT. In Expo: `await getToken()`.'
-=======
->>>>>>> refs/remotes/origin/main

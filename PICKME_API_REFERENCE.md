@@ -240,11 +240,21 @@ history keeps referencing it).
 
 ### CarpoolGroup
 ```ts
-{ id, school, name, invite_code /* e.g. "K7MNP2QR" */, created_by, created_at }
+{
+  id, school, school_name, name,
+  invite_code /* e.g. "K7MNP2QR" */,
+  member_count /* int */, created_by, created_at
+}
 ```
 On **create**, the body also needs a write-only `family` (one of *your*
 families) — it becomes the group's first admin member. `invite_code` is
-server-generated; share it for others to join.
+server-generated; share it for others to join. `member_count` and `school_name`
+are read-only conveniences for list/detail cards.
+
+### CarpoolGroupInvite
+```ts
+{ id, group, email, status: "pending" | "accepted" | "revoked", invite_code, created_at }
+```
 
 ### CarpoolGroupMember
 ```ts
@@ -468,6 +478,19 @@ DELETE /carpool-groups/{id}/members/{memberId}/   # admin only; can't remove the
 POST /carpool-groups/join/   { "invite_code": "K7MNP2QR", "family": "<your family id>" }
 → 200/201 { "group": CarpoolGroup, "member": CarpoolGroupMember }
 ```
+
+### Invite a parent by email (admin only) / accept / leave
+```
+POST /carpool-groups/{id}/invite/   { "email": "parent@example.com" }
+       # admin only (→ 403 for non-admin members, 404 for non-members)
+       → 201 CarpoolGroupInvite     # emails the invite_code + a pickme://carpool/accept?token=… deep link
+POST /carpool-group-invites/accept/   { "token": "<uuid>", "family": "<your family id>" }
+       → 200/201 { "group": CarpoolGroup, "member": CarpoolGroupMember }   # adds your family as "member", idempotent
+POST /carpool-groups/{id}/leave/      → 204   # removes the caller's family
+```
+Re-inviting a still-pending email resends rather than duplicating. On **leave**,
+if the leaving family is the group's only admin and others remain, the **oldest
+remaining member is auto-promoted to admin** (no dead-end for the frontend).
 
 ### Rotation rule (admin to edit)
 ```

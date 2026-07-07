@@ -1,19 +1,26 @@
+from django.core.mail import send_mail
 from django.db import transaction
 from django.utils import timezone
+from drf_spectacular.utils import OpenApiTypes, extend_schema
 from rest_framework import exceptions, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from carpool.models import (
     CarpoolAssignment,
     CarpoolGroup,
+    CarpoolGroupInvite,
     CarpoolGroupMember,
     CarpoolSwapRequest,
 )
 from carpool.serializers import (
     AssignmentSerializer,
+    CarpoolGroupInviteSerializer,
     CarpoolGroupMemberSerializer,
     CarpoolGroupSerializer,
+    CarpoolInviteAcceptSerializer,
+    CarpoolInviteCreateSerializer,
     GenerateAssignmentsSerializer,
     JoinGroupSerializer,
     RotationRuleSerializer,
@@ -116,6 +123,78 @@ class CarpoolGroupViewSet(
                 {"member": ["Cannot remove the group's only admin."]}
             )
         member.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"])
+    def invite(self, request, pk=None):
+        """POST /carpool-groups/{id}/invite/ — admin emails a parent an invite.
+
+        Mirrors the family-invite flow: the email carries both the group's
+        invite_code (to type into "Join with a code") and a deep link for
+        one-tap accept. Re-inviting a still-pending email resends, not
+        duplicates (get_or_create on the pending row).
+        """
+        group = self.get_object()
+        self._require_admin(group)
+        serializer = CarpoolInviteCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"].lower()
+
+        invite, _ = CarpoolGroupInvite.objects.get_or_create(
+            group=group,
+            email=email,
+            status=CarpoolGroupInvite.Status.PENDING,
+            defaults={"invited_by": request.user},
+        )
+        inviter = request.user.full_name or request.user.email
+        send_mail(
+            subject=f"You're invited to join {group.name}",
+            message=(
+                f"{inviter} invited you to join the carpool group "
+                f'"{group.name}". Open the app and either tap this link:\n\n'
+                f"pickme://carpool/accept?token={invite.token}\n\n"
+                f'or use "Join with a code" and enter: {group.invite_code}'
+            ),
+            from_email=None,
+            recipient_list=[email],
+            fail_silently=True,
+        )
+        return Response(
+            CarpoolGroupInviteSerializer(invite).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"])
+    def leave(self, request, pk=None):
+        """POST /carpool-groups/{id}/leave/ — remove the caller's family.
+
+        Last-admin handling: if the leaving family is the only admin and other
+        members remain, the oldest remaining member is auto-promoted to admin
+        (chosen over a 409 block for smoother mobile UX — see DECISIONS.md).
+        """
+        group = self.get_object()
+        memberships = list(
+            group.members.filter(family__members__user=request.user)
+        )
+        if not memberships:
+            raise exceptions.PermissionDenied(
+                "You are not a member of this group."
+            )
+
+        leaving_ids = [m.id for m in memberships]
+        leaving_is_admin = any(
+            m.role == CarpoolGroupMember.Role.ADMIN for m in memberships
+        )
+        with transaction.atomic():
+            remaining = group.members.exclude(id__in=leaving_ids)
+            has_other_admin = remaining.filter(
+                role=CarpoolGroupMember.Role.ADMIN
+            ).exists()
+            if leaving_is_admin and remaining.exists() and not has_other_admin:
+                heir = remaining.order_by("joined_at").first()
+                heir.role = CarpoolGroupMember.Role.ADMIN
+                heir.save(update_fields=["role"])
+            group.members.filter(id__in=leaving_ids).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get", "put"], url_path="rotation-rule")
@@ -305,4 +384,45 @@ class SwapRequestViewSet(viewsets.GenericViewSet):
                 "swap_request": SwapRequestSerializer(swap).data,
                 "assignment": AssignmentSerializer(assignment).data,
             }
+        )
+
+
+class CarpoolInviteAcceptView(APIView):
+    """POST /carpool-group-invites/accept/ {"token","family"} — join by token.
+
+    Mirrors families.InviteAcceptView: validates a pending token, adds the
+    caller's family to the group as a member (idempotent), marks the invite
+    accepted.
+    """
+
+    @extend_schema(
+        request=CarpoolInviteAcceptSerializer, responses=OpenApiTypes.OBJECT
+    )
+    def post(self, request):
+        serializer = CarpoolInviteAcceptSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        try:
+            invite = CarpoolGroupInvite.objects.select_related("group").get(
+                token=serializer.validated_data["token"],
+                status=CarpoolGroupInvite.Status.PENDING,
+            )
+        except CarpoolGroupInvite.DoesNotExist:
+            raise exceptions.NotFound("Invite not found or no longer valid.")
+
+        member, created = CarpoolGroupMember.objects.get_or_create(
+            carpool_group=invite.group,
+            family=serializer.validated_data["family"],
+            defaults={"role": CarpoolGroupMember.Role.MEMBER},
+        )
+        invite.status = CarpoolGroupInvite.Status.ACCEPTED
+        invite.accepted_at = timezone.now()
+        invite.save(update_fields=["status", "accepted_at"])
+        return Response(
+            {
+                "group": CarpoolGroupSerializer(invite.group).data,
+                "member": CarpoolGroupMemberSerializer(member).data,
+            },
+            status=status.HTTP_200_OK if not created else status.HTTP_201_CREATED,
         )

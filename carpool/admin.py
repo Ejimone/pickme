@@ -3,6 +3,7 @@ from django.contrib import admin
 from carpool.models import (
     CarpoolAssignment,
     CarpoolGroup,
+    CarpoolGroupInvite,
     CarpoolGroupMember,
     CarpoolRotationOrder,
     CarpoolRotationRule,
@@ -44,3 +45,10 @@ class AssignmentAdmin(admin.ModelAdmin):
 class SwapRequestAdmin(admin.ModelAdmin):
     list_display = ("assignment", "target_family", "status", "created_at")
     list_filter = ("status",)
+
+
+@admin.register(CarpoolGroupInvite)
+class CarpoolGroupInviteAdmin(admin.ModelAdmin):
+    list_display = ("email", "group", "status", "invited_by", "created_at")
+    list_filter = ("status",)
+    search_fields = ("email", "group__name")

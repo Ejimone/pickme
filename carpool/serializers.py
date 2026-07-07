@@ -3,6 +3,7 @@ from rest_framework import serializers
 from carpool.models import (
     CarpoolAssignment,
     CarpoolGroup,
+    CarpoolGroupInvite,
     CarpoolGroupMember,
     CarpoolRotationOrder,
     CarpoolRotationRule,
@@ -15,19 +16,54 @@ class CarpoolGroupSerializer(serializers.ModelSerializer):
     family = serializers.PrimaryKeyRelatedField(
         queryset=Family.objects.all(), write_only=True
     )  # the creating user's family, becomes the first admin member
+    member_count = serializers.SerializerMethodField()
+    school_name = serializers.CharField(source="school.name", read_only=True)
 
     class Meta:
         model = CarpoolGroup
         fields = [
             "id",
             "school",
+            "school_name",
             "name",
             "invite_code",
+            "member_count",
             "created_by",
             "created_at",
             "family",
         ]
         read_only_fields = ["id", "invite_code", "created_by", "created_at"]
+
+    def get_member_count(self, obj):
+        return obj.members.count()
+
+    def validate_family(self, family):
+        user = self.context["request"].user
+        if not family.members.filter(user=user).exists():
+            raise serializers.ValidationError(
+                "You are not a member of this family."
+            )
+        return family
+
+
+class CarpoolGroupInviteSerializer(serializers.ModelSerializer):
+    invite_code = serializers.CharField(
+        source="group.invite_code", read_only=True
+    )
+
+    class Meta:
+        model = CarpoolGroupInvite
+        fields = ["id", "group", "email", "status", "invite_code", "created_at"]
+        read_only_fields = fields
+
+
+class CarpoolInviteCreateSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class CarpoolInviteAcceptSerializer(serializers.Serializer):
+    token = serializers.UUIDField()
+    family = serializers.PrimaryKeyRelatedField(queryset=Family.objects.all())
 
     def validate_family(self, family):
         user = self.context["request"].user

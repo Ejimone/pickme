@@ -195,3 +195,48 @@ class CarpoolSwapRequest(models.Model):
 
     def __str__(self):
         return f"Swap {self.assignment} → {self.target_family} ({self.status})"
+
+
+class CarpoolGroupInvite(models.Model):
+    """Pending email invite to join a carpool group.
+
+    Mirrors families.FamilyInvite — an admin invites an email, which redeems
+    either via the emailed token or by typing the group's invite_code.
+    """
+
+    class Status(models.TextChoices):
+        PENDING = "pending"
+        ACCEPTED = "accepted"
+        REVOKED = "revoked"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    group = models.ForeignKey(
+        CarpoolGroup, on_delete=models.CASCADE, related_name="invites"
+    )
+    email = models.EmailField()
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="carpool_invites_sent",
+    )
+    token = models.UUIDField(
+        default=uuid.uuid4, unique=True, editable=False, db_index=True
+    )
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.PENDING
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "carpool_group_invites"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["group", "email"],
+                condition=models.Q(status="pending"),
+                name="unique_pending_group_invite",
+            )
+        ]
+
+    def __str__(self):
+        return f"Invite {self.email} → {self.group} ({self.status})"
