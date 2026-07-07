@@ -254,3 +254,30 @@ Choices made where the spec docs (`instructions/`) were silent.
 - **Device-token registration is idempotent** via `update_or_create` on the
   unique `token` (the serializer's `UniqueValidator` is dropped) so a reinstall
   rebinds the token to the current user instead of 409-ing.
+
+## Stage 8
+
+- **`SOSAlert` lives in the `trips` app**, not a new `safety` app — the project
+  layout (working rule #3) fixes the app list, and an SOS is raised from and
+  scoped to a trip, so it sits with the trip domain and reuses the trip WS
+  channel.
+- **Raise requires a trip** (validated in `SOSAlertCreateSerializer`) even
+  though the schema column is nullable: API-DESIGN.md raises "from an active
+  trip," and the recipient set is defined by the trip. The nullable column is
+  kept for schema fidelity / future group-level alerts.
+- **SOS bypasses the deferred push queue.** `trips.sos.fan_out_sos` creates a
+  `type=sos` Notification per guardian (which the post_save signal broadcasts
+  as `notification.new` and *queues* a push for) and then pushes to Expo
+  *synchronously in-request*. `delivered_at` idempotency means the later queued
+  task no-ops, so there's no double-send — the emergency just doesn't wait in
+  line. It also emits an `sos_alert` event on the `trip_{id}` channel for
+  anyone with the live map open (dual delivery: WS + push).
+- **Recipients exclude the raiser** (they know) and are the trip's guardians —
+  driver, families with a child at a stop, and carpool-group members —
+  resolved by `notifications.recipients.trip_recipients`, the user-facing
+  inverse of `trips.permissions.trips_visible_to`.
+- **SOS push honors the user's push preference** like every other type (v1);
+  overriding a muted `sos` preference for safety-critical alerts is a possible
+  future change, noted here rather than silently assumed.
+- **Any guardian can resolve**; the list defaults to `status=active` and is
+  scoped to alerts on trips the user can see (or ones they raised).

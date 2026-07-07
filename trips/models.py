@@ -197,3 +197,55 @@ class LocationPing(models.Model):
 
     def __str__(self):
         return f"Ping {self.trip_id} @ {self.recorded_at}"
+
+
+class SOSAlert(models.Model):
+    """Emergency alert raised from a trip (DATABASE-SCHEMA.md §25).
+
+    Fan-out is immediate and bypasses the deferred push queue — see
+    `trips.sos.fan_out_sos` — reaching every guardian tied to the trip over
+    WebSocket and Expo push at once.
+    """
+
+    class Status(models.TextChoices):
+        ACTIVE = "active"
+        RESOLVED = "resolved"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    trip = models.ForeignKey(
+        Trip,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="sos_alerts",
+    )
+    raised_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sos_alerts_raised",
+    )
+    lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.ACTIVE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sos_alerts_resolved",
+    )
+
+    class Meta:
+        db_table = "sos_alerts"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status", "created_at"], name="sos_status_created_idx")
+        ]
+
+    def __str__(self):
+        return f"SOS {self.id} ({self.status}) by {self.raised_by}"

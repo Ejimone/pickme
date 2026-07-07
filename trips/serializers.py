@@ -2,7 +2,14 @@ from django.db.models import Q
 from rest_framework import serializers
 
 from families.models import Child
-from trips.models import LocationPing, PickupEvent, Trip, TripStop, TripStopChild
+from trips.models import (
+    LocationPing,
+    PickupEvent,
+    SOSAlert,
+    Trip,
+    TripStop,
+    TripStopChild,
+)
 
 
 def children_visible_to(user):
@@ -172,3 +179,45 @@ class PickupEventSerializer(serializers.ModelSerializer):
             "scheduled_time",
             "created_at",
         ]
+
+
+class SOSAlertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SOSAlert
+        fields = [
+            "id",
+            "trip",
+            "raised_by",
+            "lat",
+            "lng",
+            "message",
+            "status",
+            "created_at",
+            "resolved_at",
+            "resolved_by",
+        ]
+        read_only_fields = [
+            "raised_by",
+            "status",
+            "created_at",
+            "resolved_at",
+            "resolved_by",
+        ]
+
+
+class SOSAlertCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SOSAlert
+        fields = ["trip", "lat", "lng", "message"]
+        extra_kwargs = {"trip": {"required": True, "allow_null": False}}
+
+    def validate_trip(self, trip):
+        # API-DESIGN.md: an SOS is raised from an active trip the user is on.
+        request = self.context.get("request")
+        from trips.permissions import user_can_access_trip
+
+        if request and not user_can_access_trip(request.user, trip.id):
+            raise serializers.ValidationError(
+                "You are not a participant on this trip."
+            )
+        return trip

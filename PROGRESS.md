@@ -53,8 +53,12 @@
 - [x] Triggers wired: swap request, chat message, schedule change, driver arrived (stop → arrived), pickup cascade (PickupEvent → picked_up)
 - [x] Tests: API scoping, consumer auth rejection (4001/4003) + fan-out, push idempotency/preference gating, dismissal dedupe, poller window, all four triggers (26 tests)
 
-## Stage 8 — Safety
-- [ ] `SOSAlert` model + immediate fan-out (WebSocket + push)
+## Stage 8 — Safety ✅
+- [x] `SOSAlert` model (in the `trips` app; `(status, created_at)` index) + `/sos-alerts/` raise/list, `/{id}/resolve/`
+- [x] Immediate fan-out (`trips.sos.fan_out_sos`) bypassing the deferred push queue: `type=sos` Notification per guardian pushed to Expo synchronously in-request (`delivered_at` makes the queued dup a no-op)
+- [x] Dual delivery: per-guardian `notification.new` (via the notification signal) + `sos_alert` on the trip's `trip_{id}` channel (new `TripConsumer.sos_alert` handler) + push
+- [x] Recipients = trip guardians (driver + stop-child families + group members) minus the raiser (`notifications.recipients.trip_recipients`)
+- [x] Tests: guardian fan-out (raiser/outsider excluded), immediate push + `delivered_at`, WS broadcast to trip channel, list scoping, resolve, raise/resolve authorization (7 tests)
 
 ## Stage 9 — Media, polish, deploy
 - [ ] Cloudinary integration

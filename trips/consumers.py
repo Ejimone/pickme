@@ -141,3 +141,8 @@ class TripConsumer(AsyncJsonWebsocketConsumer):
 
     async def trip_status_update(self, event):
         await self.send_json(event)
+
+    async def sos_alert(self, event):
+        # Emergency broadcast pushed by trips.sos.fan_out_sos — watchers with
+        # the live map open see it instantly on the trip channel.
+        await self.send_json(event)

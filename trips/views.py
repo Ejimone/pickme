@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -7,11 +8,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.permissions import IsFamilyMember
-from trips.models import PickupEvent, Trip, TripStop
+from trips.models import PickupEvent, SOSAlert, Trip, TripStop
 from trips.permissions import IsTripDriver, IsTripParticipant, trips_visible_to
 from trips.serializers import (
     LocationPingSerializer,
     PickupEventSerializer,
+    SOSAlertCreateSerializer,
+    SOSAlertSerializer,
     TripCreateSerializer,
     TripSerializer,
     TripStopSerializer,
@@ -208,3 +211,53 @@ class PickupEventViewSet(
         elif date:
             qs = qs.filter(date=date)
         return qs
+
+
+class SOSAlertViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Raise/list/resolve emergency alerts. Raising fans out immediately to
+    every guardian on the trip (see trips.sos.fan_out_sos)."""
+
+    serializer_class = SOSAlertSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Alerts on a trip the user can see, or ones they raised themselves.
+        qs = SOSAlert.objects.filter(
+            Q(trip__in=Trip.objects.filter(trips_visible_to(self.request.user)))
+            | Q(raised_by=self.request.user)
+        ).distinct().select_related("trip", "raised_by")
+        status_filter = self.request.query_params.get("status", "active")
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        return qs
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return SOSAlertCreateSerializer
+        return SOSAlertSerializer
+
+    def create(self, request, *args, **kwargs):
+        from trips.sos import fan_out_sos
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        alert = serializer.save(raised_by=request.user)
+        fan_out_sos(alert)
+        return Response(
+            SOSAlertSerializer(alert).data, status=status.HTTP_201_CREATED
+        )
+
+    @action(detail=True, methods=["post"])
+    def resolve(self, request, pk=None):
+        alert = self.get_object()
+        if alert.status == SOSAlert.Status.RESOLVED:
+            return Response(SOSAlertSerializer(alert).data)
+        alert.status = SOSAlert.Status.RESOLVED
+        alert.resolved_at = timezone.now()
+        alert.resolved_by = request.user
+        alert.save(update_fields=["status", "resolved_at", "resolved_by"])
+        return Response(SOSAlertSerializer(alert).data)

@@ -37,6 +37,27 @@ def trip_stop_recipients(stop):
     )
 
 
+def trip_recipients(trip):
+    """Every guardian tied to a trip: the driver, the families with a child at
+    one of its stops, and the carpool group's member families. Mirrors
+    `trips.permissions.trips_visible_to`, inverted onto users."""
+    criteria = (
+        Q(trips=trip.id)  # the driver
+        | Q(
+            family_memberships__family__children__trip_stop_entries__trip_stop__trip=(
+                trip.id
+            )
+        )
+    )
+    if trip.carpool_group_id:
+        criteria |= Q(
+            family_memberships__family__carpool_memberships__carpool_group=(
+                trip.carpool_group_id
+            )
+        )
+    return list(User.objects.filter(criteria).distinct())
+
+
 def thread_recipients(thread):
     """Everyone party to a chat thread: the carpool group's member families,
     plus (for a trip thread) the driver and the families with a child at a
