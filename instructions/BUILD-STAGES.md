@@ -1,6 +1,6 @@
 # Build Stages — School Pickup Coordinator Backend
 
-Meant to be worked through with Claude Code, one stage at a time. Each stage should end in a working, migrated, tested state before moving to the next.
+Meant to be worked through one stage at a time. Each stage should end in a working, migrated, tested state before moving to the next.
 
 ## Stage 0 — Scaffold
 - Django project (`config/`) + apps: `accounts`, `families`, `schools`, `carpool`, `trips`, `chat`, `notifications`, `core`
