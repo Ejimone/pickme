@@ -14,12 +14,52 @@ def rsa_keypair():
     return private_key, private_key.public_key()
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _celery_eager():
+    """Run Celery tasks inline in tests so `.delay()` never touches a broker
+    (the app's real broker is a remote TLS Redis)."""
+    from config.celery import app
+
+    app.conf.task_always_eager = True
+    app.conf.task_eager_propagates = False
+    yield
+
+
+@pytest.fixture(autouse=True)
+def _in_memory_channels(settings):
+    """Keep every test off the real (remote) channel layer — notification and
+    trip/chat broadcasts run against an in-process layer instead of Redis."""
+    settings.CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    }
+    from channels.layers import channel_layers
+
+    channel_layers.backends = {}
+    yield
+    channel_layers.backends = {}
+
+
+@pytest.fixture(autouse=True)
+def _no_push_dispatch(monkeypatch):
+    """The Notification post_save signal queues `send_push_notification.delay`
+    on commit. Make it a no-op everywhere so transaction=True consumer tests
+    never run the push task inline (eager) or hit the broker. Tests that need
+    the push path call the task function directly."""
+    from notifications.tasks import send_push_notification
+
+    monkeypatch.setattr(send_push_notification, "delay", lambda *a, **k: None)
+
+
 @pytest.fixture
 def clerk_settings(settings):
-    settings.CLERK_ISSUER = ""
-    settings.CLERK_JWKS_URL = ""
+    settings.CLERK_ISSUER = "https://test.clerk.accounts.dev"
+    settings.CLERK_JWKS_URL = (
+        "https://test.clerk.accounts.dev/.well-known/jwks.json"
+    )
     settings.CLERK_AUTHORIZED_PARTIES = []
-    settings.CLERK_WEBHOOK_SIGNING_SECRET = ""
+    # Dummy test signing secret — base64("testsecrettestsecret"), NOT a real
+    # credential. Svix requires a valid base64 body after the whsec_ prefix.
+    settings.CLERK_WEBHOOK_SIGNING_SECRET = "whsec_dGVzdHNlY3JldHRlc3RzZWNyZXQ="
     return settings
 
 

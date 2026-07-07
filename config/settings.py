@@ -5,6 +5,7 @@ All environment-specific values come from environment variables via
 django-environ. See `.env.example` for the full list.
 """
 
+import os
 from pathlib import Path
 
 import environ
@@ -91,8 +92,39 @@ DATABASES = {
 
 AUTH_USER_MODEL = "accounts.User"
 
-# Redis — shared by the Celery broker and (from Stage 4) the channel layer
-REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
+# Redis — shared by the Celery broker/result backend, the Channels layer, and
+# the ETA throttle lock. An explicit REDIS_URL wins; otherwise a native TLS
+# (rediss://) URL is derived from Upstash REST creds — on Upstash the REST token
+# doubles as the native Redis password.
+REDIS_URL = env("REDIS_URL", default="")
+if not REDIS_URL:
+    _upstash_url = env("UPSTASH_REDIS_REST_URL", default="")
+    _upstash_token = env("UPSTASH_REDIS_REST_TOKEN", default="")
+    if _upstash_url and _upstash_token:
+        _upstash_host = _upstash_url.split("://", 1)[-1].split("/", 1)[0]
+        REDIS_URL = f"rediss://default:{_upstash_token}@{_upstash_host}:6379"
+    else:
+        REDIS_URL = "redis://localhost:6379/0"
+
+# TLS Redis (rediss://, e.g. Upstash): point every TLS client at certifi's CA
+# bundle (macOS Python often can't find the system store) via the standard env
+# var, and build the ssl config Celery requires for a rediss broker/backend.
+REDIS_USE_TLS = REDIS_URL.startswith("rediss://")
+_REDIS_SSL = None
+if REDIS_USE_TLS:
+    import ssl as _ssl
+
+    import certifi as _certifi
+
+    os.environ.setdefault("SSL_CERT_FILE", _certifi.where())
+    _REDIS_SSL = {
+        "ssl_cert_reqs": (
+            _ssl.CERT_REQUIRED
+            if env.bool("REDIS_SSL_VERIFY", default=True)
+            else _ssl.CERT_NONE
+        ),
+        "ssl_ca_certs": _certifi.where(),
+    }
 
 CHANNEL_LAYERS = {
     "default": {
@@ -105,6 +137,9 @@ CHANNEL_LAYERS = {
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
+if _REDIS_SSL is not None:
+    CELERY_BROKER_USE_SSL = _REDIS_SSL
+    CELERY_REDIS_BACKEND_USE_SSL = _REDIS_SSL
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_TIMEZONE = "UTC"
 CELERY_BEAT_SCHEDULE = {

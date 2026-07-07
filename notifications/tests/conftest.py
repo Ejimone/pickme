@@ -9,17 +9,8 @@ from families.models import Child
 from schools.models import School
 
 
-@pytest.fixture(autouse=True)
-def in_memory_channel_layer(settings):
-    """Notification creation broadcasts on every write; keep it off Redis."""
-    settings.CHANNEL_LAYERS = {
-        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
-    }
-    from channels.layers import channel_layers
-
-    channel_layers.backends = {}
-    yield
-    channel_layers.backends = {}
+# The in-memory channel layer is set globally by the root conftest's
+# _in_memory_channels autouse fixture.
 
 
 @pytest.fixture(autouse=True)

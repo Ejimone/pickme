@@ -18,10 +18,8 @@ databases:
     engine: PG
     version: "16"
     production: false        # bump to a real plan for prod
-  - name: pickme-redis
-    engine: REDIS
-    version: "7"
-    production: false
+# Redis is Upstash (managed TLS Redis), configured via the UPSTASH_* app envs
+# below — not a DO managed add-on.
 
 services:
   - name: web
@@ -41,9 +39,6 @@ services:
       - key: DATABASE_URL
         scope: RUN_TIME
         value: ${pickme-db.DATABASE_URL}
-      - key: REDIS_URL
-        scope: RUN_TIME
-        value: ${pickme-redis.DATABASE_URL}
       - key: ALLOWED_HOSTS
         scope: RUN_TIME
         value: ${APP_DOMAIN}
@@ -66,9 +61,6 @@ workers:
       - key: DATABASE_URL
         scope: RUN_TIME
         value: ${pickme-db.DATABASE_URL}
-      - key: REDIS_URL
-        scope: RUN_TIME
-        value: ${pickme-redis.DATABASE_URL}
 
   - name: beat
     dockerfile_path: Dockerfile
@@ -84,9 +76,6 @@ workers:
       - key: DATABASE_URL
         scope: RUN_TIME
         value: ${pickme-db.DATABASE_URL}
-      - key: REDIS_URL
-        scope: RUN_TIME
-        value: ${pickme-redis.DATABASE_URL}
 
 jobs:
   - name: migrate
@@ -113,6 +102,13 @@ envs:
     value: ""
   - key: CELERY_TASK_ALWAYS_EAGER
     value: "False"
+  # Redis — Upstash (REDIS_URL left unset → derived from these; REST token is
+  # also the native Redis password).
+  - key: UPSTASH_REDIS_REST_URL
+    value: ""
+  - key: UPSTASH_REDIS_REST_TOKEN
+    type: SECRET
+    value: ""
   # Clerk
   - key: CLERK_ISSUER
     value: ""

@@ -14,18 +14,6 @@ pytestmark = [pytest.mark.django_db(transaction=True), pytest.mark.asyncio]
 
 
 @pytest.fixture(autouse=True)
-def in_memory_channel_layer(settings):
-    settings.CHANNEL_LAYERS = {
-        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
-    }
-    from channels.layers import channel_layers
-
-    channel_layers.backends = {}
-    yield
-    channel_layers.backends = {}
-
-
-@pytest.fixture(autouse=True)
 def no_push_dispatch(monkeypatch):
     from notifications.tasks import send_push_notification
 

@@ -30,3 +30,6 @@ pytest-mock>=3.14
 
 # Maps (Distance Matrix ETA)
 requests>=2.32
+
+# TLS CA bundle for rediss:// (Upstash) Redis connections
+certifi>=2024.2.2

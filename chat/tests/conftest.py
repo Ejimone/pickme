@@ -9,17 +9,8 @@ from chat.models import ChatThread
 from schools.models import School
 
 
-@pytest.fixture(autouse=True)
-def in_memory_channel_layer(settings):
-    """Chat posts broadcast on every write; keep it off Redis in tests."""
-    settings.CHANNEL_LAYERS = {
-        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
-    }
-    from channels.layers import channel_layers
-
-    channel_layers.backends = {}
-    yield
-    channel_layers.backends = {}
+# The in-memory channel layer is set globally by the root conftest's
+# _in_memory_channels autouse fixture.
 
 
 @pytest.fixture

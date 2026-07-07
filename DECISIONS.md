@@ -333,3 +333,32 @@ Choices made where the spec docs (`instructions/`) were silent.
   `school_name`** so group cards render "N families" + the school without extra
   round-trips. `member_count` is a method (not an annotation) so it's correct on
   single-object responses (create/join/accept) too.
+
+## Redis — Upstash (managed TLS Redis)
+
+- **One `REDIS_URL` drives everything** (Celery broker + result backend, the
+  Channels layer, the ETA throttle lock). Config precedence: an explicit
+  `REDIS_URL` wins; otherwise a native `rediss://default:<TOKEN>@<host>:6379` URL
+  is derived from `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` — on
+  Upstash the REST token doubles as the native Redis password (verified with a
+  live PING/SET/GET).
+- **The creds are REST creds but we use the native RESP endpoint.** Celery,
+  channels_redis, and redis-py all speak RESP over TLS, not Upstash's HTTP REST
+  API, so the REST URL/token are only used to *build* the `rediss://` URL.
+- **TLS CA via certifi.** macOS Python often can't find the system CA bundle, so
+  for `rediss://` we set `SSL_CERT_FILE=certifi.where()` process-wide (fixes
+  redis-py, redis.asyncio/channels, and requests at once) and pass
+  `ssl_cert_reqs`/`ssl_ca_certs` to Celery's `broker_use_ssl` /
+  `redis_backend_use_ssl` (a rediss broker requires explicit ssl config).
+  `REDIS_SSL_VERIFY=False` switches to `CERT_NONE` as an escape hatch. `certifi`
+  is now a pinned dependency.
+- **Tests are hermetic — they never touch the remote Redis.** Root `conftest.py`
+  now: forces the in-memory Channels layer globally (`_in_memory_channels`),
+  no-ops `send_push_notification.delay` globally (`_no_push_dispatch`), and runs
+  Celery eagerly (`_celery_eager`). The per-app in-memory channel fixtures were
+  removed (a second autouse fixture resetting the layer broke instance sharing
+  across the async consumer tests). Also restored the dummy Svix test secret in
+  `clerk_settings` (it had been blanked, 500-ing the webhook tests).
+- **Deploy**: `.do/app.yaml` drops the DO managed-Redis add-on and configures
+  Upstash via `UPSTASH_*` app envs (token as a SECRET); `REDIS_URL` is left unset
+  so the derive logic runs.
