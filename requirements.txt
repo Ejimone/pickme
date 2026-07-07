@@ -3,6 +3,7 @@ Django>=5.1,<5.3
 djangorestframework>=3.15
 django-environ>=0.11
 psycopg[binary]>=3.2
+whitenoise[brotli]>=6.6   # serve static files (admin/DRF/Swagger) under ASGI
 
 # Async / real-time (Channels wired up in Stage 4, ASGI entrypoint from Stage 0)
 channels[daphne]>=4.1
