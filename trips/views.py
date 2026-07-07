@@ -7,6 +7,8 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ValidationErro
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from django.db.models import Q
+
 from core.permissions import IsFamilyMember
 from trips.models import PickupEvent, SOSAlert, Trip, TripStop
 from trips.permissions import IsTripDriver, IsTripParticipant, trips_visible_to
