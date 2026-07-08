@@ -75,20 +75,18 @@ each consumer checks room membership before accepting. On a bad/absent token the
 socket is **closed with code `4001`** (unauthenticated); on a valid token that
 isn't allowed in that room, **`4003`** (forbidden). See §9.
 
-### ⚠️ There is no `/me` endpoint yet (open item)
+### Who am I — `GET /me/`
 
-The backend does not currently expose "who am I" returning the **local `User`
-UUID**. You get the Clerk identity from `@clerk/clerk-expo` directly, but a few
-things need the *local* UUID:
+`GET /api/v1/me/` returns the current user's **local `User`** (resolved from the
+Clerk JWT) in the User summary shape (§4). Its `id` is the **local UUID** you'll
+need to:
 
-- connecting to `ws/notifications/{user_id}/` (the path is the local UUID),
-- rendering chat "mine vs theirs" (`ChatMessage.sender` is the local UUID),
-- checking "am I the driver / the raiser" (`Trip.driver`, `SOSAlert.raised_by`).
+- connect to `ws/notifications/{user_id}/` (the path is the local UUID),
+- render chat "mine vs theirs" (compare to `ChatMessage.sender`),
+- check "am I the driver / the raiser" (`Trip.driver`, `SOSAlert.raised_by`).
 
-**Flag this back to the backend** — it's a ~10-line addition
-(`GET /api/v1/me/` → the `User` summary). Until then, most screens work off
-already-scoped list endpoints and don't need the raw UUID; the notification
-socket is the one hard blocker. (Ask and it'll be added.)
+Fetch it once after sign-in and cache it (`['me']`). It's the bridge between the
+Clerk identity (`@clerk/clerk-expo`) and the ids used throughout this API.
 
 ---
 
@@ -182,6 +180,8 @@ second fetch just to render a label.
 ```ts
 { id, full_name, email, avatar_url }
 ```
+Fetch your own via **`GET /me/`** (§1). Its `id` is the local `User` UUID used
+as `driver`/`sender`/`raised_by`/`requested_by` everywhere else.
 
 ### Family
 ```ts
@@ -746,7 +746,7 @@ in-app/foreground delivery; background delivery is Expo push.
 { "type": "notification.new", "notification": { id, type, title, body, data, is_read, created_at } }
 ```
 Cache wiring: prepend to `['notifications']` and bump an unread badge.
-*(Needs the local UUID — see the `/me` open item in §1.)*
+*(The `{user_id}` in the path is your local UUID from `GET /me/` — §1.)*
 
 ---
 
@@ -790,8 +790,6 @@ trip-channel WS) and bypasses the deferred queue.
 
 ## 11. Known gaps / not-yet-built
 
-- **No `/me` endpoint** returning the local `User` UUID — see §1. The single
-  most likely thing you'll need added early (blocks the notification socket).
 - **Media upload is wired (Cloudinary).** Use `POST /children/{id}/photo/`
   (proxy) or `POST /media/signature/` (client-direct signed upload) — see §8.
   Backend defaults to a `fake` Cloudinary backend in dev (`CLOUDINARY_BACKEND`);
@@ -817,7 +815,10 @@ trip-channel WS) and bypasses the deferred queue.
    one `openapi-fetch` client whose middleware calls `getToken()` and sets
    `Authorization: Bearer <jwt>`, with base URL `…/api/v1`. Map non-2xx to your
    toast/inline-error handling by reading `error.error.{message,details}` (§3).
-2. **Query keys** (mirror `FRONTEND-ARCHITECTURE.md §5`): `['families']`,
+   Right after sign-in, fetch **`GET /me/`** and cache it (`['me']`) — you'll
+   compare its `id` against `sender`/`driver`/`raised_by` and use it for the
+   notification socket path.
+2. **Query keys** (mirror `FRONTEND-ARCHITECTURE.md §5`): `['me']`, `['families']`,
    `['children', { family }]`, `['schools']`, `['assignments', groupId, { from, to }]`,
    `['trip', tripId]`, `['trip', tripId, 'latest-location']`, `['pickup-events', { date }]`,
    `['threads']`, `['messages', threadId]` (infinite), `['notifications', { unread }]`.
@@ -835,7 +836,7 @@ trip-channel WS) and bypasses the deferred queue.
 6. **Push + deep links:** request permission → `POST /device-tokens/` with the
    Expo token → handle taps by reading the notification `data` (§8) and routing.
    Also open `ws/notifications/{myUserId}/` for foreground in-app delivery
-   *(pending the `/me` UUID — §1)*.
+   (`myUserId` = `GET /me/` → `id`, fetched once at sign-in — §1).
 7. **SOS:** the `SOSButton` posts `POST /sos-alerts/`; the receiving side listens
    on the trip socket's `sos_alert` **and** the notification stream/push, and
    renders the full-screen `SOSBanner` (screen 18) until `resolve`.

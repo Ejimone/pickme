@@ -1235,6 +1235,24 @@ paths:
                 type: object
                 additionalProperties: {}
           description: ''
+  /api/v1/me/:
+    get:
+      operationId: me_retrieve
+      description: |-
+        GET /me/ — the current user (resolved from the Clerk JWT), in the same
+        User summary shape used wherever a user is nested elsewhere. `id` matches
+        the `driver`/`sender`/`raised_by`/`requested_by` ids in other responses.
+      tags:
+      - me
+      security:
+      - ClerkJWT: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSummary'
+          description: ''
   /api/v1/media/signature/:
     post:
       operationId: media_signature_create
@@ -3460,6 +3478,30 @@ components:
         * `chat_message` - Chat Message
         * `schedule_change` - Schedule Change
         * `sos` - Sos
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        avatar_url:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+      required:
+      - avatar_url
+      - email
+      - full_name
+      - id
   securitySchemes:
     ClerkJWT:
       type: http
