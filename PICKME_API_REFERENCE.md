@@ -338,10 +338,24 @@ are read-only conveniences for list/detail cards.
 
 ### ChatThread
 ```ts
-{ id, context_type: "carpool_group" | "trip", carpool_group /* id | null */, trip /* id | null */, created_at }
+{
+  id, context_type: "carpool_group" | "trip",
+  carpool_group /* id | null */, trip /* id | null */, created_at,
+
+  // per-requesting-user summary (for the chat list — no extra fetch needed):
+  unread_count,                 // messages not sent by you and not yet read; 0 if caught up
+  last_message_at,              // ISO | null — mirror of last_message.created_at, for sorting
+  last_message: {               // most recent message, or null if none
+    content,                    // null for an image-only message
+    sender_name,
+    message_type: "text" | "image" | "system",
+    created_at
+  } | null
+}
 ```
 Threads are **auto-created** (one per group, one per trip) — there is no
-create-thread endpoint.
+create-thread endpoint. `GET /chat-threads/` is **ordered by `last_message_at`
+descending (nulls last)**, so the most recent conversation is first.
 
 ### ChatMessage
 ```ts
@@ -607,14 +621,19 @@ signals, so re-fetching (or WS-invalidating) reflects `en_route`/`arrived`/
 
 ### Chat
 ```
-GET  /chat-threads/                          # group + trip threads you can access
+GET  /chat-threads/                          # group + trip threads; ordered by last activity,
+                                             # each row carries unread_count/last_message/last_message_at (§4)
 GET  /chat-threads/{id}/messages/            # cursor-paginated history, newest first
 POST /chat-threads/{id}/messages/   { "content": "running 5 late", "attachment_url": "...", "message_type": "text" }
        → 201 ChatMessage           # REST fallback; primary send path is the WebSocket
+       # image-only: { "attachment_url": "https://res.cloudinary.com/…", "message_type": "image" }  (no content)
 POST /chat-threads/{id}/read/   { "message_id": "<id>" }   # mark read up to & including this message
-       → { "marked_read": <count> }
+       → { "marked_read": <count> }   # drops the thread's unread_count to 0 on the next list load
 ```
-A message needs `content` or `attachment_url`. Sending (via REST or WS) fires a
+A message needs `content` or `attachment_url` (image-only messages omit
+`content`). Both the REST response and the `message.new` WS frame carry
+`attachment_url` + `message_type`, so images render live. Sending (via REST or
+WS) fires a
 `chat_message` notification to every other participant (§9 for the live path).
 
 ### Notifications

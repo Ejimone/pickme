@@ -133,9 +133,13 @@ if REDIS_USE_TLS:
         "ssl_ca_certs": _certifi.where(),
     }
 
+# Pub/Sub layer (persistent SUBSCRIBE), not the core layer's blocking BZPOPMIN
+# receive loop — serverless/managed Redis (Upstash) drops long-blocking
+# connections, which made the core layer disconnect consumers in a loop with
+# more than one concurrent client. Pub/Sub also uses fewer connections.
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "channels_redis.pubsub.RedisPubSubChannelLayer",
         "CONFIG": {"hosts": [REDIS_URL]},
     },
 }

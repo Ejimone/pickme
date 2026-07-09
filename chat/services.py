@@ -29,6 +29,45 @@ def user_can_access_thread(user, thread_id):
     ).exists()
 
 
+def annotate_thread_summary(queryset, user):
+    """Add per-user chat-list summary fields via correlated subqueries (no N+1
+    over messages) and order by most-recent activity, nulls last:
+
+      - unread_count: messages not sent by the user and not yet read by them
+        (read state = a ChatReadReceipt per (message, user))
+      - last_message_at / last_message_{content,type,sender_name}: the most
+        recent message's fields (all null when the thread has no messages)
+    """
+    from django.db.models import Count, F, IntegerField, OuterRef, Subquery, Value
+    from django.db.models.functions import Coalesce
+
+    from chat.models import ChatMessage
+
+    latest = ChatMessage.objects.filter(thread=OuterRef("pk")).order_by(
+        "-created_at"
+    )
+    unread = (
+        ChatMessage.objects.filter(thread=OuterRef("pk"))
+        .exclude(sender=user)  # your own messages aren't "unread"
+        .exclude(read_receipts__user=user)  # already receipted = read
+        .order_by()
+        .values("thread")
+        .annotate(c=Count("id"))
+        .values("c")
+    )
+    return queryset.annotate(
+        last_message_at=Subquery(latest.values("created_at")[:1]),
+        last_message_content=Subquery(latest.values("content")[:1]),
+        last_message_type=Subquery(latest.values("message_type")[:1]),
+        last_message_sender_name=Subquery(
+            latest.values("sender__full_name")[:1]
+        ),
+        unread_count=Coalesce(
+            Subquery(unread, output_field=IntegerField()), Value(0)
+        ),
+    ).order_by(F("last_message_at").desc(nulls_last=True))
+
+
 def broadcast_to_thread(thread_id, payload):
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(f"chat_{thread_id}", payload)

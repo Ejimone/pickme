@@ -12,7 +12,12 @@ from chat.serializers import (
     ChatThreadSerializer,
     MarkReadSerializer,
 )
-from chat.services import mark_read, post_message, threads_visible_to
+from chat.services import (
+    annotate_thread_summary,
+    mark_read,
+    post_message,
+    threads_visible_to,
+)
 from core.pagination import TimeOrderedCursorPagination
 
 
@@ -25,11 +30,11 @@ class ChatThreadViewSet(
     permission_classes = [IsAuthenticated, IsThreadParticipant]
 
     def get_queryset(self):
-        return (
-            ChatThread.objects.filter(threads_visible_to(self.request.user))
-            .distinct()
-            .order_by("-created_at")
-        )
+        queryset = ChatThread.objects.filter(
+            threads_visible_to(self.request.user)
+        ).distinct()
+        # Per-user summary fields + ordering by most-recent activity.
+        return annotate_thread_summary(queryset, self.request.user)
 
     @action(detail=True, methods=["get", "post"])
     def messages(self, request, pk=None):

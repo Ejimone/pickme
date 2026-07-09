@@ -362,3 +362,40 @@ Choices made where the spec docs (`instructions/`) were silent.
 - **Deploy**: `.do/app.yaml` drops the DO managed-Redis add-on and configures
   Upstash via `UPSTASH_*` app envs (token as a SECRET); `REDIS_URL` is left unset
   so the derive logic runs.
+
+## Chat thread list summary (frontend-requested)
+
+- **`ChatThreadSerializer` gained per-user `unread_count`, `last_message_at`, and
+  a nested `last_message`** (`{content, sender_name, message_type, created_at}`,
+  or null). All are added by `chat.services.annotate_thread_summary(qs, user)`
+  via **correlated Subqueries** (latest message fields + a grouped unread count)
+  — no N+1 over messages, and unread is a Subquery (not an aggregate over the
+  visibility joins) so the `threads_visible_to` joins can't inflate it.
+- **`unread_count`** = messages in the thread not sent by the user and not yet
+  receipted by them (read state is the existing per-(message, user)
+  `ChatReadReceipt`; `POST /chat-threads/{id}/read/` back-fills receipts, so a
+  read thread counts 0). Your own messages never count as unread.
+- **`GET /chat-threads/` is ordered by `last_message_at` desc, nulls last**
+  (`F("last_message_at").desc(nulls_last=True)`), so the most recent
+  conversation is first and never-used threads sink to the bottom.
+- Image-only messages (`attachment_url`, `message_type="image"`, no `content`)
+  were already accepted by `ChatMessageCreateSerializer`; both the REST response
+  and the `message.new` WS frame already carry `attachment_url`/`message_type`
+  (`chat.services.serialize_message`). The Cloudinary signature is computed over
+  exactly `{folder, timestamp}` (`core.cloudinary`), matching the client's
+  signed upload — covered by a unit test.
+
+## Channels layer — pub/sub, not the core layer (Upstash fix)
+
+- **Symptom:** with two concurrent WebSocket clients on one thread, the second
+  connected then dropped in a tight reconnect loop; messages didn't deliver.
+- **Cause:** `channels_redis.core.RedisChannelLayer` runs a per-consumer
+  **blocking `BZPOPMIN`** receive loop. Upstash (serverless/managed Redis) drops
+  long-blocking connections, so each consumer's receive loop died and the
+  consumer disconnected. Reproduced: a two-client consumer test times out on the
+  core layer over Upstash but passes on the pub/sub layer.
+- **Fix:** switch `CHANNEL_LAYERS` to
+  `channels_redis.pubsub.RedisPubSubChannelLayer` (persistent SUBSCRIBE instead
+  of blocking pops; also fewer connections, which suits Upstash's connection
+  cap). No consumer/code changes — the layer is swappable. Tests keep using the
+  in-process InMemoryChannelLayer, so this is a production-runtime change only.

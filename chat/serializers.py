@@ -4,6 +4,12 @@ from chat.models import ChatMessage, ChatThread
 
 
 class ChatThreadSerializer(serializers.ModelSerializer):
+    # All three come from annotations added in ChatThreadViewSet.get_queryset,
+    # computed for the requesting user (see chat.services.annotate_thread_summary).
+    unread_count = serializers.IntegerField(read_only=True)
+    last_message_at = serializers.DateTimeField(read_only=True)
+    last_message = serializers.SerializerMethodField()
+
     class Meta:
         model = ChatThread
         fields = [
@@ -12,7 +18,21 @@ class ChatThreadSerializer(serializers.ModelSerializer):
             "carpool_group",
             "trip",
             "created_at",
+            "unread_count",
+            "last_message_at",
+            "last_message",
         ]
+
+    def get_last_message(self, obj):
+        created = getattr(obj, "last_message_at", None)
+        if created is None:
+            return None  # no messages yet
+        return {
+            "content": getattr(obj, "last_message_content", None),
+            "sender_name": getattr(obj, "last_message_sender_name", None),
+            "message_type": getattr(obj, "last_message_type", None),
+            "created_at": created,
+        }
 
 
 class ChatMessageSerializer(serializers.ModelSerializer):

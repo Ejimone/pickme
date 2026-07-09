@@ -2260,10 +2260,23 @@ components:
           type: string
           format: date-time
           readOnly: true
+        unread_count:
+          type: integer
+          readOnly: true
+        last_message_at:
+          type: string
+          format: date-time
+          readOnly: true
+        last_message:
+          type: string
+          readOnly: true
       required:
       - context_type
       - created_at
       - id
+      - last_message
+      - last_message_at
+      - unread_count
     Child:
       type: object
       properties:

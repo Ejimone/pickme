@@ -1,11 +1,32 @@
 """Cloudinary signed-upload params endpoint (POST /media/signature/)."""
 
+import hashlib
+
 import pytest
 from rest_framework.test import APIClient
 
 from accounts.models import User
 
 pytestmark = pytest.mark.django_db
+
+
+def test_cloudinary_signature_covers_folder_and_timestamp(settings):
+    """The real backend must sign exactly {folder, timestamp} so a client
+    upload of {file, api_key, timestamp, signature, folder} verifies."""
+    from core.cloudinary import CloudinaryService
+
+    settings.CLOUDINARY_CLOUD_NAME = "demo"
+    settings.CLOUDINARY_API_KEY = "123"
+    settings.CLOUDINARY_API_SECRET = "s3cr3t"
+    params = CloudinaryService().signed_params(folder="chat")
+
+    expected = hashlib.sha1(
+        f"folder={params['folder']}&timestamp={params['timestamp']}s3cr3t".encode()
+    ).hexdigest()
+    assert params["signature"] == expected
+    assert params["upload_url"] == (
+        "https://api.cloudinary.com/v1_1/demo/image/upload"
+    )
 
 
 @pytest.fixture
