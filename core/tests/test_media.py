@@ -29,6 +29,48 @@ def test_cloudinary_signature_covers_folder_and_timestamp(settings):
     )
 
 
+def test_cloudinary_upload_signs_all_options_and_returns_secure_url(
+    settings, mocker
+):
+    """The avatar proxy passes transformation/format/overwrite options; every
+    signed form field except file/api_key/resource_type/signature must be part
+    of the signature, or Cloudinary rejects the upload."""
+    from core import cloudinary as cl
+
+    settings.CLOUDINARY_CLOUD_NAME = "demo"
+    settings.CLOUDINARY_API_KEY = "123"
+    settings.CLOUDINARY_API_SECRET = "s3cr3t"
+
+    post = mocker.patch.object(cl.requests, "post")
+    post.return_value.json.return_value = {
+        "secure_url": "https://res.cloudinary.com/demo/image/upload/child_avatars/x.jpg"
+    }
+    post.return_value.raise_for_status.return_value = None
+
+    url = cl.CloudinaryService().upload(
+        object(),
+        folder="child_avatars",
+        resource_type="image",
+        overwrite=True,
+        transformation="c_fill,g_face,h_512,w_512,q_auto",
+        format="jpg",
+    )
+
+    assert url.endswith("child_avatars/x.jpg")
+    # resource_type is the URL path segment, not a signed field.
+    assert post.call_args.args[0] == (
+        "https://api.cloudinary.com/v1_1/demo/image/upload"
+    )
+    sent = post.call_args.kwargs["data"]
+    assert "resource_type" not in sent
+    signed = {
+        k: v for k, v in sent.items() if k not in ("signature", "api_key")
+    }
+    payload = "&".join(f"{k}={signed[k]}" for k in sorted(signed))
+    expected = hashlib.sha1(f"{payload}s3cr3t".encode()).hexdigest()
+    assert sent["signature"] == expected
+
+
 @pytest.fixture
 def client(db):
     user = User.objects.create_user(email="m@example.com", clerk_user_id="user_m")

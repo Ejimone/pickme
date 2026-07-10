@@ -1,9 +1,11 @@
+from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Count
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiTypes, extend_schema
 from rest_framework import exceptions, mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -177,28 +179,67 @@ class ChildViewSet(viewsets.ModelViewSet):
         instance.is_active = False
         instance.save(update_fields=["is_active"])
 
-    @action(detail=True, methods=["post"], url_path="photo")
+    # Avatars are normalized to a small, square, face-cropped JPEG so stored
+    # assets are uniform and cheap; Cloudinary decodes the source (HEIC/HEIF/
+    # PNG/WebP/JPEG) natively before applying this.
+    AVATAR_MAX_BYTES = 10 * 1024 * 1024  # 10 MB
+    AVATAR_TRANSFORMATION = "c_fill,g_face,h_512,w_512,q_auto"
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="photo",
+        parser_classes=[MultiPartParser, FormParser, JSONParser],
+    )
     def photo(self, request, pk=None):
         """POST /children/{id}/photo/ — set the child's avatar.
 
-        Accepts a multipart `file` (proxied to Cloudinary, per API-DESIGN.md) or
-        an already-hosted `photo_url` (e.g. after a client-side signed upload via
-        /media/signature/). Stores the resulting URL and returns the child.
+        Two content types are accepted:
+
+        * ``multipart/form-data`` with a single file field named ``file`` — the
+          raw image (HEIC/HEIF/PNG/WebP/JPEG) is proxied to Cloudinary, which
+          decodes and normalizes it; we store the returned secure URL.
+        * ``application/json`` ``{"photo_url": "https://…"}`` — an already-hosted
+          image (e.g. after a client-side signed upload via /media/signature/);
+          stored directly, no re-upload.
+
+        Returns the full updated Child (same shape as GET /children/{id}/).
         """
         from core.cloudinary import get_media_client
 
         child = self.get_object()
         upload = request.FILES.get("file")
+
         if upload is not None:
+            content_type = (upload.content_type or "").lower()
+            if not content_type.startswith("image/"):
+                raise exceptions.ValidationError(
+                    {"file": ["Unsupported file type."]}
+                )
+            if upload.size > self.AVATAR_MAX_BYTES:
+                raise exceptions.ValidationError(
+                    {"file": ["Image is too large (max 10 MB)."]}
+                )
             child.photo_url = get_media_client().upload(
-                upload, folder="children"
+                upload,
+                folder=settings.CLOUDINARY_AVATAR_FOLDER,
+                resource_type="image",
+                overwrite=True,
+                transformation=self.AVATAR_TRANSFORMATION,
+                format="jpg",
             )
         elif request.data.get("photo_url"):
-            child.photo_url = request.data["photo_url"]
+            photo_url = str(request.data["photo_url"]).strip()
+            if not photo_url.lower().startswith("https://"):
+                raise exceptions.ValidationError(
+                    {"photo_url": ["Must be an https URL."]}
+                )
+            child.photo_url = photo_url
         else:
             raise exceptions.ValidationError(
-                {"file": ["Provide a file upload or a photo_url."]}
+                {"file": ["No image provided."]}
             )
+
         child.save(update_fields=["photo_url"])
         return Response(ChildSerializer(child).data)
 

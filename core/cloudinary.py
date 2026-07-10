@@ -3,8 +3,12 @@
 `CLOUDINARY_BACKEND` picks the implementation ("fake" | "cloudinary"), so tests
 and local dev never hit Cloudinary. Two operations:
 
-- `upload(file, folder)` — server-side signed upload (used by the child-avatar
-  proxy endpoint, which stores the returned secure URL).
+- `upload(file, folder, **options)` — server-side signed upload (used by the
+  child-avatar proxy endpoint, which stores the returned secure URL). Extra
+  keyword options (e.g. `transformation`, `format`, `overwrite`) are folded into
+  the signed request so Cloudinary normalizes the stored asset. Cloudinary
+  decodes HEIC/HEIF/PNG/WebP/JPEG natively — the raw uploaded file is passed
+  straight through.
 - `signed_params(folder, resource_type)` — hands a short-lived signature back to
   the client so it can upload directly to Cloudinary (used for chat
   attachments). The API secret never leaves the server.
@@ -47,7 +51,7 @@ class FakeCloudinaryService:
             "upload_url": UPLOAD_URL.format(cloud=cloud, resource=resource_type),
         }
 
-    def upload(self, file, folder=None):
+    def upload(self, file, folder=None, **options):
         folder = folder or settings.CLOUDINARY_UPLOAD_FOLDER
         name = getattr(file, "name", "upload")
         return f"https://res.cloudinary.com/demo/image/upload/{folder}/{name}"
@@ -75,15 +79,24 @@ class CloudinaryService:
             ),
         }
 
-    def upload(self, file, folder=None):
+    def upload(self, file, folder=None, **options):
         folder = folder or settings.CLOUDINARY_UPLOAD_FOLDER
+        # resource_type selects the API path, not a signed form field.
+        resource_type = options.pop("resource_type", "image")
         timestamp = int(time.time())
         params = {"folder": folder, "timestamp": timestamp}
+        # Fold caller options (transformation, format, overwrite, …) into the
+        # signed set — Cloudinary requires the signature to cover every param
+        # sent except file, api_key, resource_type and the signature itself.
+        for key, value in options.items():
+            if isinstance(value, bool):
+                value = "true" if value else "false"
+            params[key] = value
         params["signature"] = _signature(params, settings.CLOUDINARY_API_SECRET)
         params["api_key"] = settings.CLOUDINARY_API_KEY
         response = requests.post(
             UPLOAD_URL.format(
-                cloud=settings.CLOUDINARY_CLOUD_NAME, resource="image"
+                cloud=settings.CLOUDINARY_CLOUD_NAME, resource=resource_type
             ),
             data=params,
             files={"file": file},

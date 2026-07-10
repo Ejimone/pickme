@@ -7,9 +7,11 @@ django-environ. See `.env.example` for the full list.
 
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 import environ
 from celery.schedules import crontab
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -194,7 +196,36 @@ CLOUDINARY_BACKEND = env("CLOUDINARY_BACKEND", default="fake")  # "fake" | "clou
 CLOUDINARY_CLOUD_NAME = env("CLOUDINARY_CLOUD_NAME", default="")
 CLOUDINARY_API_KEY = env("CLOUDINARY_API_KEY", default="")
 CLOUDINARY_API_SECRET = env("CLOUDINARY_API_SECRET", default="")
+# Allow the single-URL form `cloudinary://<api_key>:<api_secret>@<cloud_name>`
+# as a fallback for the discrete vars above (either form works).
+_cloudinary_url = env("CLOUDINARY_URL", default="")
+if _cloudinary_url and not (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY):
+    _parsed = urlparse(_cloudinary_url)
+    CLOUDINARY_CLOUD_NAME = CLOUDINARY_CLOUD_NAME or (_parsed.hostname or "")
+    CLOUDINARY_API_KEY = CLOUDINARY_API_KEY or (_parsed.username or "")
+    CLOUDINARY_API_SECRET = CLOUDINARY_API_SECRET or (_parsed.password or "")
 CLOUDINARY_UPLOAD_FOLDER = env("CLOUDINARY_UPLOAD_FOLDER", default="pickme")
+# Folder for child-avatar uploads (POST /children/{id}/photo/).
+CLOUDINARY_AVATAR_FOLDER = env("CLOUDINARY_AVATAR_FOLDER", default="child_avatars")
+
+# Fail loudly at boot rather than 500-ing per upload when the real backend is
+# selected but its credentials are missing from the environment.
+if CLOUDINARY_BACKEND == "cloudinary":
+    _missing = [
+        name
+        for name, value in (
+            ("CLOUDINARY_CLOUD_NAME", CLOUDINARY_CLOUD_NAME),
+            ("CLOUDINARY_API_KEY", CLOUDINARY_API_KEY),
+            ("CLOUDINARY_API_SECRET", CLOUDINARY_API_SECRET),
+        )
+        if not value
+    ]
+    if _missing:
+        raise ImproperlyConfigured(
+            "CLOUDINARY_BACKEND=cloudinary requires "
+            + ", ".join(_missing)
+            + " (set them, or a single CLOUDINARY_URL, in the environment)."
+        )
 
 # Clerk auth
 CLERK_ISSUER = env("CLERK_ISSUER", default="")
